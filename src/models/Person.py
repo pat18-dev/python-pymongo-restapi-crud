@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 from dataclasses_json import dataclass_json
 
@@ -8,7 +9,9 @@ from dataclasses_json import dataclass_json
 class Person:
     document_number: str = None
     name: str = None
-    mail_address: str = None
-    phone_number: str = None
-    type_document: str = None
-    gender: str = None
+    level: List[str] = field(
+        default_factory=lambda: ["PLANNING", "DESIGN", "TODO", "TEST", "END"]
+    )
+    grade: List[str] = field(
+        default_factory=lambda: ["PLANNING", "DESIGN", "TODO", "TEST", "END"]
+    )
