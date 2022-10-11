@@ -10,9 +10,7 @@ class BillTicket:
     billticketid = None
     tickets: List[str] = field(default_factory=lambda: [])
     write_at: str
-    create_at: str 
+    create_at: str
     write_udi: str
-    create_uid: str 
-    type: List[str] = field(
-        default_factory=lambda: ["PENDING", "CANCELED"]
-    )
+    create_uid: str
+    type: List[str] = field(default_factory=lambda: ["PENDING", "CANCELED"])

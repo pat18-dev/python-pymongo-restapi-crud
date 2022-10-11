@@ -10,9 +10,7 @@ class Activity:
     activityid = None
     description: str
     write_at: str
-    create_at: str 
+    create_at: str
     write_udi: str
-    create_uid: str 
-    stages: List[str] = field(
-        default_factory=lambda: ["START", "END"]
-    )
+    create_uid: str
+    stages: List[str] = field(default_factory=lambda: ["START", "END"])

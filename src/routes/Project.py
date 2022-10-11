@@ -1,13 +1,8 @@
-import sys
-
 from bson import json_util
 from bson.objectid import ObjectId
 from flask import Blueprint, abort, jsonify, make_response, request
 
 from decorators import wrap_response
-from models.Person import Person as PersonRepo
-from models.Project import Project as ProjectRepo
-from models.Task import Task as TaskRepo
 from mongodb import mongo
 
 Project = Blueprint("project", __name__, url_prefix="/project")
