@@ -1,8 +1,9 @@
+import os
 import sys
 
 from bson import json_util
 from bson.objectid import ObjectId
-from flask import Blueprint, abort, jsonify, make_response, request
+from flask import Blueprint, abort, jsonify, make_response, request, redirect, url_for
 
 from decorators import wrap_response
 from mongodb import mongo
@@ -16,7 +17,7 @@ def adapter_repo():
     # get the uploaded file
     uploaded_file = request.files["file"]
     if uploaded_file.filename != "":
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
+        file_path = os.path.join(os.getenv("FILE_PATH", "C:\Users\patrickfuentes\Documents\python-pymongo-restapi-crud\src\file"), uploaded_file.filename)
         # set the file path
         uploaded_file.save(file_path)
         # save the file

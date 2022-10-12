@@ -1,9 +1,7 @@
 from bson import json_util
 from bson.objectid import ObjectId
 from flask import (
-    current_app,
     Blueprint,
-    json,
     flash,
     request,
     render_template,
@@ -11,16 +9,25 @@ from flask import (
     url_for,
     session,
 )
+from flask_session import Session
 
 from decorators import wrap_response
-from mongodb import mongo
+from database import DB
 
+UserRepository = DB()
 Login = Blueprint("Login", __name__)
 
 
-@Login.route("/login", methods=["POST"])
+@Login.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html", title="login", error="")
+    error = None
+    if request.method == 'POST':
+        data = request.get_json()
+        if UserRepository.find_one("user", {"document": data.document}):
+            flash('Error document not defined')
+        session¨["current_user"] = {"id": data.document, "name": "user1", "is_authenticated": True}
+        return redirect(url_for('main'))
+    return render_template("templates/login.html", title="login", error=error)
 
 
 @Login.route("/logout", methods=["GET"])
@@ -32,4 +39,4 @@ def logout():
 @Login.route("/main", methods=["GET"])
 # @user_required
 def main():
-    return redirect(url_for("Login.login"))
+    return render_template("templates/main.html", title="main", user = current_user, datos="")    # return redirect(url_for("Login.login"))

@@ -16,3 +16,4 @@ Werkzeug==2.0.2
 flask_pymongo
 dataclasses
 dataclasses_json
+Flask-Session

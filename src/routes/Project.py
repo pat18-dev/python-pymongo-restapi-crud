@@ -2,9 +2,13 @@ from bson import json_util
 from bson.objectid import ObjectId
 from flask import Blueprint, abort, jsonify, make_response, request
 
+
 from decorators import wrap_response
+from models.Person import Person as ProjectDomain
 from mongodb import mongo
 
+
+ProjectRepository = mongo.db.project
 Project = Blueprint("project", __name__, url_prefix="/project")
 
 
@@ -12,9 +16,9 @@ Project = Blueprint("project", __name__, url_prefix="/project")
 @wrap_response
 def create_project():
     data = request.get_json()
-    ReferenceProject = ProjectRepo.from_dict(data)
+    ReferenceProject = ProjectDomain.from_dict(data)
     if ReferenceProject:
-        result = mongo.db.project.insert_one(ReferenceProject.to_dict())
+        result = ProjectRepository.insert_one(ReferenceProject.to_dict())
         ReferenceProject._id = str(result.inserted_id)
         return make_response(
             jsonify({"message": f"project created id: {result.inserted_id!r}"}), 200

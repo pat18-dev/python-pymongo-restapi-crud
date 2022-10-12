@@ -1,26 +1,17 @@
 from flask import Flask, jsonify, make_response, request
 
 # import uuid
-from flask_pymongo import PyMongo
-
-from mongodb import mongo
-from routes.Person import Person
-from routes.Project import Project
-from routes.Task import Task
+from flask_session import Session
+from routes.Login import Login
 
 app = Flask(__name__)
 
 app.secret_key = "secretkey"
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
-app.config["MONGO_URI"] = "mongodb://database/pythonmongodb"
-
-# mongo = PyMongo(app)
-
-mongo.init_app(app)
-
-app.register_blueprint(Person)
-app.register_blueprint(Project)
-app.register_blueprint(Task)
+app.register_blueprint(Login)
 
 
 @app.route("/", methods=["GET"])
