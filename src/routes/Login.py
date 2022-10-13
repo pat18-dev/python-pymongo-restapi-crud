@@ -12,22 +12,24 @@ from flask import (
 from flask_session import Session
 
 from decorators import wrap_response
-from database import DB
+from mongodb import Mongo
 
-UserRepository = DB()
+UserRepository = Mongo("user")
 Login = Blueprint("Login", __name__)
 
 
 @Login.route("/login", methods=["GET", "POST"])
 def login():
     error = None
+    user = {"id": "00000000", "name": "INVITADO", "is_authenticated": False}
     if request.method == 'POST':
         data = request.get_json()
         if UserRepository.find_one("user", {"document": data.document}):
             flash('Error document not defined')
-        session¨["current_user"] = {"id": data.document, "name": "user1", "is_authenticated": True}
-        return redirect(url_for('main'))
-    return render_template("templates/login.html", title="login", error=error)
+        user = {"id": data.document, "name": "user1", "is_authenticated": True}
+        session["current_user"] = user
+        return redirect(url_for('Login.main'))
+    return render_template("login.html", title="login", current_user=user, error=error)
 
 
 @Login.route("/logout", methods=["GET"])
@@ -39,4 +41,4 @@ def logout():
 @Login.route("/main", methods=["GET"])
 # @user_required
 def main():
-    return render_template("templates/main.html", title="main", user = current_user, datos="")    # return redirect(url_for("Login.login"))
+    return render_template("main.html", title="main", user=session["current_user"], datos="")    # return redirect(url_for("Login.login"))

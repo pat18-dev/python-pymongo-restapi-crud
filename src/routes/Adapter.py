@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint, abort, jsonify, make_response, request, redirect, url_for
 
 from decorators import wrap_response
-from mongodb import mongo
+from mongodb1 import mongo
 
 Adapter = Blueprint("adapter", __name__, url_prefix="/adapter")
 

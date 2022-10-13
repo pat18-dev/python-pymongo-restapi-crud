@@ -5,7 +5,7 @@ from flask import Blueprint, abort, jsonify, make_response, request
 
 from decorators import wrap_response
 from models.Person import Person as ProjectDomain
-from mongodb import mongo
+from mongodb1 import mongo
 
 
 ProjectRepository = mongo.db.project

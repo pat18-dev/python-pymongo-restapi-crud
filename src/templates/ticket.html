@@ -1,5 +1,9 @@
 {% extends "components/base.html" %} 
 {% block content %}
+<div>
+   {% include "/components/navbar.html" %}
+</div>
+
 <div class="row">
    {% for item in datos %}
       <div class="card text-white bg-dark mb-3" style="max-width: 18rem">
