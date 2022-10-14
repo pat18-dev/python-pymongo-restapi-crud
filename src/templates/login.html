@@ -23,37 +23,33 @@
 		{% endif %} {% endwith %}
 
 		<form method="POST" action="/login">
-			<div class="row mb-3">
-				<label for="inputDocument" class="col-sm-2 col-form-label"
+			<div class="mb-3">
+				<label for="inputDocument" class="form-label"
 					>Document</label
 				>
-				<div class="col-sm-10">
-					<input
-						class="form-control"
-						id="inputDocument"
-						type="text"
-						name="document"
-						placeholder="Your Document"
-						autofocus=""
-						minlength="8"
-						maxlength="8"
-					/>
-				</div>
+				<input
+					class="form-control"
+					id="inputDocument"
+					type="text"
+					name="document"
+					placeholder="Your Document"
+					autofocus=""
+					minlength="8"
+					maxlength="8"
+				/>
 			</div>
 
-			<div class="row mb-3">
-				<label for="inputPassword" class="col-sm-2 col-form-label"
+			<div class="mb-3">
+				<label for="inputPassword" class="form-label"
 					>Password</label
 				>
-				<div class="col-sm-10">
-					<input
-						class="form-control"
-						id="inputPassword"
-						type="password"
-						name="password"
-						placeholder="Your Password"
-					/>
-				</div>
+				<input
+					class="form-control"
+					id="inputPassword"
+					type="password"
+					name="password"
+					placeholder="Your Password"
+				/>
 			</div>
 
 			<div class="row mb-3">
@@ -71,7 +67,8 @@
 				</div>
 			</div>
 
-			<button class="btn btn-primary">Login</button>
+			<button class="w-100 btn btn-lg btn-primary">Login</button>
+			<p class="mt-5 mb-3 text-muted">© 2022</p>
 		</form>
 	</div>
 </div>
