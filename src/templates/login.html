@@ -1,5 +1,5 @@
 {% extends "components/base.html" %} {% block content %}
-<div class="column is-4 is-offset-4">
+<main class="column is-4 is-offset-4">
 	<h3 class="title">Login</h3>
 	<div class="box">
 		{% with messages = get_flashed_messages() %} {% if messages %}
@@ -34,8 +34,6 @@
 					name="document"
 					placeholder="Your Document"
 					autofocus=""
-					minlength="8"
-					maxlength="8"
 				/>
 			</div>
 
@@ -68,8 +66,8 @@
 			</div>
 
 			<button class="w-100 btn btn-lg btn-primary">Login</button>
-			<p class="mt-5 mb-3 text-muted">© 2022</p>
+			<p class="mt-5 mb-3 text-center text-muted">© 2022</p>
 		</form>
 	</div>
-</div>
+</main>
 {% endblock %}

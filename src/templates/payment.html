@@ -1,0 +1,35 @@
+{% extends "components/base.html" %} {% block content %}
+<div>{% include "/components/navbar.html" %}</div>
+
+<div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Nombre</th>
+				<th scope="col">Eliminar</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% include "/components/mdatos.html" %}
+		</tbody>
+	</table>
+</div>
+<script>
+	function drop_payment(id) {
+		var url = "127.0.0.1/";
+		var data = { paymentid: id };
+
+		fetch(url, {
+			method: "POST", // or 'PUT'
+			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => console.log("Success:", response));
+	}
+</script>
+{% endblock %}

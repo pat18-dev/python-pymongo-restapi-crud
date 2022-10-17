@@ -1,37 +1,210 @@
-{% extends "components/base.html" %}
-{% block content %}
-<div>
-   {% include "/components/navbar.html" %}
-</div>
+{% extends "components/base.html" %} {% block content %}
+<div>{% include "/components/navbar.html" %}</div>
 
 <div class="container-fluid bg-light">
-   <button class="btn btn-outline-success me-2" type="button">Agregar</button>
-   <form class="d-flex">
-      <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-      <button class="btn btn-outline-success" type="submit">Search</button>
-   </form>
+	<form class="d-flex" method="GET" action="/ticket/by">
+		<input
+			class="form-control me-2"
+			type="input"
+			name="param"
+			placeholder="Search"
+			aria-label="Search"
+		/>
+		<button class="btn btn-outline-success" type="submit">Search</button>
+	</form>
 </div>
 
-<div>
-   <table class="table">
-      <thead>
-         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Editar</th>
-            <th scope="col">Eliminar</th>
-         </tr>
-      </thead>
-      <tbody>
-         {% for item in datos %}
-         <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
-         </tr>
-         {% endfor %}
-      </tbody>
-   </table>
+<div class="row gap-2">
+	<button
+		type="button"
+		class="btn btn-outline-success col-4"
+		onclick="view_ticket('N/A', 'S')"
+	>
+		Agregar
+	</button>
+	<button class="btn btn-outline-warning col-4" type="button">Eliminar Comprobante</button>
+	<button class="btn btn-outline-info col-4" type="button">Pagar</button>
 </div>
+
+{% if search %}
+<div class="alert alert-warning" role="alert">
+	FILTRADO EN BASE A: {{search}} PRESIONE HOME SI DESEA CARGAR LA VISTA COMPLETA
+</div>
+{% endif %}
+
+<div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">ID</th>
+				<th scope="col">Nombre</th>
+				<th scope="col">Editar</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% include "/components/mdatos.html" %}
+		</tbody>
+	</table>
+</div>
+
+<!-- Modal -->
+<div
+	class="modal"
+	id="staticBackdrop"
+	data-bs-backdrop="static"
+	data-bs-keyboard="false"
+	tabindex="-1"
+	aria-labelledby="staticBackdropLabel"
+	aria-hidden="true"
+>
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1 class="modal-title fs-5" id="staticBackdropLabel">
+					Agregar/Editar
+				</h1>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
+			</div>
+			<div class="modal-body">
+				<input type="text" id="isnew" class="form-control hidden" />
+				<div class="input-group mb-3">
+					<span class="input-group-text">ID</span>
+					<input type="text" id="modal_id" aria-label="ID" class="form-control" />
+				</div>
+				<div class="input-group mb-3">
+					<span class="input-group-text">Nombre</span>
+					<input type="text" id="modal_name" aria-label="Nombre" class="form-control" />
+				</div>
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="modal__level"
+						>Level</label
+					>
+					<select class="form-select" id="modal__level">
+						<option selected>Elegir...</option>
+						<option value="DEUDORES">DEUDORES</option>
+						<option value="INICIAL 2022">INICIAL 2022</option>
+						<option value="PERSONAL D">PERSONAL D</option>
+						<option value="PRIMARIA 2022">PRIMARIA 2022</option>
+						<option value="SECUNDARIA 2022">SECUNDARIA 2022</option>
+					</select>
+				</div>
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="modal_grade"
+						>Grade</label
+					>
+					<select class="form-select" id="modal_grade">
+						<option selected>Elegir...</option>
+						<option value="3 años">3 años</option>
+						<option value="4 años">4 años</option>
+						<option value="5 años">5 años</option>
+						<option value="1ro">1ro</option>
+						<option value="2do">2do</option>
+						<option value="2doA">2doA</option>
+						<option value="3ro">3ro</option>
+						<option value="4to">4to</option>
+						<option value="5to">5to</option>
+						<option value="6to">6to</option>
+					</select>
+				</div>
+				<div class="input-group mb-3">
+					<label class="input-group-text" for="modal_category"
+						>Category</label
+					>
+					<select class="form-select" id="modal_category">
+						<option selected>Elegir...</option>
+						<option value="POLLADA">POLLADA</option>
+						<option value="PARRILLADA">PARRILLADA</option>
+						<option value="ROCOTO">ROCOTO</option>
+						<option value="LECHON">LECHON</option>
+						<option value="ARROZ">ARROZ</option>
+						<option value="BINGO">BINGO</option>
+					</select>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button
+					type="button"
+					class="btn btn-secondary"
+					data-bs-dismiss="modal"
+				>
+					Close
+				</button>
+				<button type="button" class="btn btn-primary">Grabar</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+	const myForm = document.getElementById("myForm");
+	const API = "127.0.0.1:3000/ticket/";
+	const myModal = new bootstrap.Modal(
+		document.getElementById("staticBackdrop"),
+		{}
+	);
+
+	function view_ticket(id, isnew){
+		var url = API+"view_ticket";
+		var data = { ticketid: id };
+
+		fetch(url, {
+			method: "GET", // or 'PUT'
+			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => {
+				console.log("Success:", response);
+				document.getElementById("isnew").value = isnew;
+				myModal.show();
+			});
+	}
+
+   function new_ticket() {
+		const url = API;
+		let data = { 
+         "ticketid": document.getElementById("modal_id"),
+         "name": document.getElementById("modal_name"),
+         "level": document.getElementById("modal_level"),
+         "grade": document.getElementById("modal_grade"),
+         "category": document.getElementById("modal_category"),
+      };
+
+		fetch(url, {
+			method: "POST", // or 'PUT'
+			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => console.log("Success:", response));
+	}
+
+	function drop_payment() {
+		const id = prompt("Numero de comprobante");
+		var url = API;
+		var data = { paymentid: id };
+
+		fetch(url, {
+			method: "POST", // or 'PUT'
+			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => console.log("Success:", response));
+	}
+</script>
 {% endblock %}
