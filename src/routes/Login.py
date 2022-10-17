@@ -1,4 +1,5 @@
 from sys import stderr
+import csv
 from flask import (
     Blueprint,
     flash,
@@ -8,25 +9,28 @@ from flask import (
     url_for,
     session,
 )
-from mongodb import Mongo
+from mongodb import connect
 
-UserRepository = Mongo("user")
+UserRepository = connect("user")
 Login = Blueprint("Login", __name__)
 
 
 @Login.route("/login", methods=["GET", "POST"])
 def login():
+    users = {"caja1": "parrillada", "caja2": "pollada"}
     error = None
     user = {"id": "00000000", "name": "INVITADO", "is_authenticated": False}
     if request.method == 'POST':
         print("---DATA", file=stderr)
         data = request.form.to_dict()
         print(data, file=stderr)
-        if UserRepository.collection.find_one("user", {"document": data.document}):
+        if users.get(data["document"]) is None:
             flash('Error document not defined')
+        if users[data["document"]] !=  data["pasword"]:
+            flash('Error password')
         user = {"id": data.document, "name": "user1", "is_authenticated": True}
         session["current_user"] = user
-        return redirect(url_for('Login.main'))
+        return redirect(url_for('Login.ticket'))
     return render_template("login.html", title="login", current_user=user, error=error)
 
 
@@ -34,10 +38,3 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("Login.login"))
-
-
-@Login.route("/main", methods=["GET"])
-# @user_required
-def main():
-    print(session, file=stderr)
-    return render_template("main.html", title="main", user=session["current_user"], datos="")    # return redirect(url_for("Login.login"))
