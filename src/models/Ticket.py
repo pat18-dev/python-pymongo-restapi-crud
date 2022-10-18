@@ -17,6 +17,7 @@ class Ticket:
     grade: str
     state: str
     write_udi: str
+    price: float
     write_at: field(default_factory=datetime.now().strftime("%d/%m/%Y, %H:%M:%S"))
     category: List[str] = field(
         default_factory=lambda: [k for k, v in TYPE_CATEGORIES.items()]
