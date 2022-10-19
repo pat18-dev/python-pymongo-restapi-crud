@@ -25,10 +25,15 @@
       <tbody>
          {% for item in datos %}
          <tr>
-            <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>@mdo</td>
+            <th scope="row">{{ loop.index }}</th>
+            <td>{{ item["ticketid"] }}</td>
+            {% for k, v in categories.items() %}
+               {% if k == item["category"] %}
+                  <td>{{ v }}</td>
+               {% endif %}
+            {% endfor %}
+            <td>{{item["name"]}}</td>
+            <td><button onclick="view_ticket('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Editar</button></td>
          </tr>
          {% endfor %}
       </tbody>

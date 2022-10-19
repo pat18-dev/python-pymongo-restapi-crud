@@ -1,48 +1,53 @@
-<input type="text" id="isnew" class="form-control visually-hidden" />
-<div class="input-group mb-3">
-    <span class="input-group-text">ID</span>
-    <input type="text" id="modal_id" aria-label="ID" class="form-control" />
+<div class="modal-body">
+	<input type="text" id="isnew" class="form-control visually-hidden" />
+	<input type="text" id="modal_idx" class="form-control visually-hidden" />
+	<input type="text" id="modal_id" class="form-control visually-hidden" />
+	<div class="input-group mb-3">
+		<span class="input-group-text">Nombre</span>
+		<input
+			type="text"
+			id="modal_name"
+			aria-label="Nombre"
+			class="form-control"
+		/>
+	</div>
+	<div class="input-group mb-3">
+		<label class="input-group-text" for="modal_level">Level</label>
+		<select class="form-select" id="modal_level">
+			<option selected>Elegir...</option>
+			{% for k, v in levels.items() %}
+				<option value="{{ k }}">{{ v }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="input-group mb-3">
+		<label class="input-group-text" for="modal_grade">Grade</label>
+		<select class="form-select" id="modal_grade">
+			<option selected>Elegir...</option>
+			{% for k, v in grades.items() %}
+				<option value="{{ k }}">{{ v }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="input-group mb-3">
+		<label class="input-group-text" for="modal_category">Category</label>
+		<select class="form-select" id="modal_category">
+			<option selected>Elegir...</option>
+			{% for k, v in categories.items() %}
+				<option value="{{ k }}">{{ v }}</option>
+			{% endfor %}
+		</select>
+	</div>
 </div>
-<div class="input-group mb-3">
-    <span class="input-group-text">Nombre</span>
-    <input type="text" id="modal_name" aria-label="Nombre" class="form-control" />
-</div>
-<div class="input-group mb-3">
-    <label class="input-group-text" for="modal__level">Level</label>
-    <select class="form-select" id="modal__level">
-        <option selected>Elegir...</option>
-        <option value="DEUDORES">DEUDORES</option>
-        <option value="INICIAL 2022">INICIAL 2022</option>
-        <option value="PERSONAL D">PERSONAL D</option>
-        <option value="PRIMARIA 2022">PRIMARIA 2022</option>
-        <option value="SECUNDARIA 2022">SECUNDARIA 2022</option>
-    </select>
-</div>
-<div class="input-group mb-3">
-    <label class="input-group-text" for="modal_grade">Grade</label>
-    <select class="form-select" id="modal_grade">
-        <option selected>Elegir...</option>
-        <option value="3 años">3 años</option>
-        <option value="4 años">4 años</option>
-        <option value="5 años">5 años</option>
-        <option value="1ro">1ro</option>
-        <option value="2do">2do</option>
-        <option value="2doA">2doA</option>
-        <option value="3ro">3ro</option>
-        <option value="4to">4to</option>
-        <option value="5to">5to</option>
-        <option value="6to">6to</option>
-    </select>
-</div>
-<div class="input-group mb-3">
-    <label class="input-group-text" for="modal_category">Category</label>
-    <select class="form-select" id="modal_category">
-        <option selected>Elegir...</option>
-        <option value="POLLADA">POLLADA</option>
-        <option value="PARRILLADA">PARRILLADA</option>
-        <option value="ROCOTO">ROCOTO</option>
-        <option value="LECHON">LECHON</option>
-        <option value="ARROZ">ARROZ</option>
-        <option value="BINGO">BINGO</option>
-    </select>
+<div class="modal-footer">
+	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+		Close
+	</button>
+	<button
+		type="button"
+		onclick="onticket()"
+		class="btn btn-primary"
+	>
+		Save changes
+	</button>
 </div>

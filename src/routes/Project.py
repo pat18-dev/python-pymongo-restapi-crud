@@ -3,7 +3,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint, abort, jsonify, make_response, request
 
 
-from decorators import wrap_response
+from routes.utils.decorators import wrap_response
 from models.Person import Person as ProjectDomain
 from mongodb1 import mongo
 

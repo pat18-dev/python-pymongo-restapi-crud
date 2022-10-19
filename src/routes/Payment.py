@@ -2,14 +2,11 @@ from sys import stderr
 import json
 from flask import (
     Blueprint,
-    flash,
     request,
     render_template,
-    redirect,
-    url_for,
     session,
 )
-from models import Payment as PaymentModel
+from ..models import Payment as PaymentModel
 
 from mongodb import connect
 

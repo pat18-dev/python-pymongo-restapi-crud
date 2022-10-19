@@ -1,9 +1,13 @@
 {% for item in datos %}
 <tr>
    <th scope="row">{{ loop.index }}</th>
-   <td>{{item["ticketid"]}}</td>
-   <td>{{item["category"]}}</td>
-   <td>{{item["name"]}}</td>
-   <td><button onclick="view_ticket('{{ item['ticketid'] }}', 'N')" class="btn btn-success" type="button">Editar</button></td>
+   <td>{{ item["ticketid"] }}</td>
+   {% for k, v in categories.items() %}
+      {% if k == item["category"] %}
+         <td>{{ v }}</td>
+      {% endif %}
+   {% endfor %}
+   <td>{{ item["name"] }}</td>
+   <td><button onclick="view_ticket('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Editar</button></td>
 </tr>
 {% endfor %}

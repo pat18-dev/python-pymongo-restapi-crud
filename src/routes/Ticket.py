@@ -4,19 +4,18 @@ from flask import (
     Blueprint,
     request,
     render_template,
-    redirect,
-    url_for,
     session,
     current_app,
 )
 
-from decorators import login_required
-from models import Ticket as TicketModel
+from routes.utils.decorators import login_required
 
+# from ..models.Ticket import Ticket as TicketModel
+from models.Ticket import CATEGORIES, LEVELS, GRADES
 
-# from routes.src.PaymentPDF import PaymentPDF
+from routes.utils.PaymentPDF import PaymentPDF
 # from mongodb import connect
-# UserRepository = connect("ticket")
+# TicketRepository = connect("ticket")
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 
 
@@ -48,14 +47,26 @@ def tickets(idx):
         title="ticket",
         current_user=session["current_user"],
         datos=ladatos,
+        levels=LEVELS,
+        grades=GRADES,
+        categories=CATEGORIES,
     )
+    
+    
+@Ticket.route("/view_ticket/<int:idx>", methods=["GET"])
+def view_ticket(idx):
+    data = dict()
+    datos = get_data()
+    if datos:
+        data = datos[int(idx)]
+    return data
 
 
 @Ticket.route("/filter", methods=["GET"])
 def filter_ticket():
     print("---SESSION", file=stderr)
     print(session, file=stderr)
-    param = request.args.get("param")
+    param = request.args.get("param").upper()
     ladatos = list()
     data = get_data()
     if data:
@@ -71,6 +82,9 @@ def filter_ticket():
         current_user=session["current_user"],
         datos=ladatos,
         search=param,
+        levels=LEVELS,
+        grades=GRADES,
+        categories=CATEGORIES,
     )
 
 
@@ -103,6 +117,7 @@ def pay():
         title="payment",
         current_user=session["current_user"],
         datos=ladatos,
+        categories=CATEGORIES,
     )
 
 
@@ -122,7 +137,7 @@ def make_pay():
                 if data[idx]["state"] != "P":
                     return {
                         "ok": 0,
-                        "message": f"ERROR EN EL SIGUEINTE PAGO {data[idx]['activityid']}",
+                        "message": f"ERROR PAGO: {data[idx]['ticketid']}",
                     }
         for idx in lst_ind:
             data[idx]["state"] = "E"

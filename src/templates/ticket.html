@@ -1,24 +1,37 @@
 {% extends "components/base.html" %} {% block content %}
 <div>{% include "/components/navbar.html" %}</div>
 
-<div class="container-fluid bg-light">
-	<form class="d-flex" method="GET" action="/ticket/by">
-		<input class="form-control me-2" type="input" name="param" placeholder="Search" aria-label="Search" />
+<div class="container-fluid bg-light mb-3">
+	<form class="d-flex" method="GET" action="/ticket/filter">
+		<input
+			class="form-control me-2"
+			type="input"
+			name="param"
+			placeholder="Search"
+			aria-label="Search"
+		/>
 		<button class="btn btn-outline-success" type="submit">Search</button>
 	</form>
 </div>
 
-<div class="row gap-2">
-	<button type="button" class="btn btn-outline-success col-4" onclick="view_ticket('N/A', 'S')">
+<div class="row mb-3">
+	<button
+		type="button"
+		class="btn btn-outline-success col-4"
+		onclick="view_ticket('N/A', true);"
+	>
 		Agregar
 	</button>
-	<button class="btn btn-outline-warning col-4" type="button">Eliminar Comprobante</button>
+	<button class="btn btn-outline-warning col-4" type="button">
+		Eliminar Comprobante
+	</button>
 	<button class="btn btn-outline-info col-4" type="button">Pagar</button>
 </div>
 
 {% if search %}
-<div class="alert alert-warning" role="alert">
-	FILTRADO EN BASE A: {{search}} PRESIONE HOME SI DESEA CARGAR LA VISTA COMPLETA
+<div class="alert alert-warning text-center mb-3" role="alert">
+	FILTRADO EN BASE A: <b>{{ search }}</b> PRESIONE HOME SI DESEA CARGAR LA VISTA
+	COMPLETA
 </div>
 {% endif %}
 
@@ -40,20 +53,25 @@
 </div>
 
 <!-- Modal -->
-<div class="modal my-modal-wrapper fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div
+	class="modal fade"
+	id="exampleModal"
+	tabindex="-1"
+	aria-labelledby="exampleModalLabel"
+	aria-hidden="true"
+>
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				<button
+					type="button"
+					class="btn-close"
+					data-bs-dismiss="modal"
+					aria-label="Close"
+				></button>
 			</div>
-			<div class="modal-body">
-				{% include "/components/modal.html" %}
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
-			</div>
+			{% include "/components/modal.html" %}
 		</div>
 	</div>
 </div>
@@ -61,39 +79,52 @@
 <script>
 	const myForm = document.getElementById("myForm");
 
-	function view_ticket(id, isnew) {
+	function setOptionbyValue(selectElement, value) {
+		return [...selectElement.options].some((option, index) => {
+			if (option.value == value) {
+				selectElement.selectedIndex = index;
+				return true;
+			}
+		});
+	}
+
+	function view_ticket(idx, isnew) {
 		const myModal = new bootstrap.Modal(
 			document.getElementById("exampleModal"),
 			{}
 		);
+		const url = "view_ticket/" + idx;
+		if (isnew == true) {
+			fetch(url, {
+				method: "GET", // or 'PUT'
+				headers: {
+					"Content-Type": "application/json",
+				},
+			})
+				.then((res) => res.json())
+				.catch((error) => console.error("Error:", error))
+				.then((response) => {
+					console.log("Success:", response);
+					document.getElementById("isnew").value          = String(isnew);
+					document.getElementById("modal_idx").value      = response.idx;
+					document.getElementById("modal_id").value       = response.ticketid;
+					document.getElementById("modal_name").value     = response.name;
+					document.getElementById('modal_level').value    = response.level;
+					document.getElementById('modal_grade').value    = response.grade;
+					document.getElementById('modal_category').value = response.category;
+			});
+		}
+		myModal.classList("my-modal-wrapper");
 		myModal.show();
-		// var url = "/view_ticket";
-		// var data = { ticketid: id };
-
-		// fetch(url, {
-		// 	method: "GET", // or 'PUT'
-		// 	body: JSON.stringify(data), // data can be `string` or {object}!
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// })
-		// 	.then((res) => res.json())
-		// 	.catch((error) => console.error("Error:", error))
-		// 	.then((response) => {
-		// 		console.log("Success:", response);
-		// 		document.getElementById("isnew").value = isnew;
-		// 		myModal.show();
-		// 	});
 	}
 
 	function new_ticket() {
 		const url = "/add_ticket";
 		let data = {
-			"ticketid": document.getElementById("modal_id"),
-			"name": document.getElementById("modal_name"),
-			"level": document.getElementById("modal_level"),
-			"grade": document.getElementById("modal_grade"),
-			"category": document.getElementById("modal_category"),
+			name:     document.getElementById("modal_name"),
+			level:    document.getElementById("modal_level"),
+			grade:    document.getElementById("modal_grade"),
+			category: document.getElementById("modal_category"),
 		};
 
 		fetch(url, {

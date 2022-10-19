@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, make_response, request
 import logging
 import os
-import sys
 from flask_session import Session
 from routes.Login import Login
 from routes.Ticket import Ticket
@@ -9,6 +8,8 @@ from routes.Ticket import Ticket
 app = Flask(__name__)
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+print("PATH")
+print(PROJECT_ROOT)
 
 app.secret_key = "secretkey"
 app.config["SESSION_PERMANENT"] = False

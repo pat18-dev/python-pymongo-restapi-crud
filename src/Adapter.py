@@ -1,5 +1,6 @@
 import csv
 import json
+from models.Ticket import CATEGORIES, LEVELS, GRADES, PRICES
 
 
 def procedure():
@@ -14,16 +15,6 @@ def procedure():
         "A": "000",
         "B": "000",
     }
-    plates_categorys = [
-        "POLLADA",
-        "PARRILLADA",
-        "ROCOTO",
-        "LECHON",
-        "ARROZ",
-        "POLLADA",
-        "PARRILLADA",
-    ]
-    price_plates = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
     categories = ["O", "P", "R", "L", "A", "O", "P"]
     cont = 0
     print("---DATA")
@@ -35,38 +26,55 @@ def procedure():
             for idx in range(3, 10):
                 if row[idx] != "":
                     cont += 1
+                    cat = categories[category_idx]
+                    key_level = "10"
+                    for k, v in LEVELS.items():
+                        if v == row[1].strip(' '):
+                            key_level = k
+                    key_grade = "5"
+                    for k, v in GRADES.items():
+                        if v == row[2].strip(' '):
+                            key_grade = k
                     plates.append(
                         {
                             "ticketid": row[idx],
                             "name": row[0] if row[0] != "" else "N/A",
-                            "level": row[1].upper() if row[1] != "" else "N/A",
-                            "grade": row[2].upper() if row[2] != "" else "N/A",
-                            "category": plates_categorys[category_idx],
+                            "level": key_level,
+                            "grade": key_grade,
+                            "category": cat,
                             "state": "P",
                             "write_udi": "N/A",
                             "write_at": "17/10/2022, 00:00:00",
-                            "price": price_plates[category_idx],
                             "flag": 0,
                             "idx": cont,
                         }
                     )
-                    if int(max_idx_category[categories[category_idx]]) < int(row[idx]):
-                        max_idx_category[categories[category_idx]] = row[idx]
+                    if int(max_idx_category[cat]) < int(row[idx]):
+                        max_idx_category[cat] = row[idx]
                 category_idx += 1
             category_idx = 0
     with open("db/BINGOS.csv", mode="r") as infile:
         reader = csv.reader(infile)
+        cat = "B"
         for i, row in enumerate(reader, start=cont):
             for idx in range(3, 10):
                 if row[idx] != "":
                     cont += 1
+                    key_level = "10"
+                    for k, v in LEVELS.items():
+                        if v == row[1].strip(' '):
+                            key_level = k
+                    key_grade = "5"
+                    for k, v in GRADES.items():
+                        if v == row[2].strip(' '):
+                            key_grade = k
                     bingos.append(
                         {
                             "ticketid": row[idx],
                             "name": row[0] if row[0] != "" else "N/A",
-                            "level": row[1].upper(),
-                            "grade": row[2].upper(),
-                            "category": "BINGO",
+                            "level": key_level,
+                            "grade": key_grade,
+                            "category": cat,
                             "state": "P",
                             "write_udi": "N/A",
                             "write_at": "17/10/2022, 00:00:00",
