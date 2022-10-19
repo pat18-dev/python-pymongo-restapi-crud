@@ -5,7 +5,15 @@ import json
 def procedure():
     plates = list()
     bingos = list()
-    max_idx_category = {"F": 0,"O": "000", "P": "000", "R": "000", "L": "000", "A": "000", "B": "000"}
+    max_idx_category = {
+        "F": 0,
+        "O": "000",
+        "P": "000",
+        "R": "000",
+        "L": "000",
+        "A": "000",
+        "B": "000",
+    }
     plates_categorys = [
         "POLLADA",
         "PARRILLADA",
@@ -15,15 +23,14 @@ def procedure():
         "POLLADA",
         "PARRILLADA",
     ]
-    price_plates = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
-    categories = [k for k, _ in max_idx_category.items()]
+    price_plates = [10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0]
+    categories = ["O", "P", "R", "L", "A", "O", "P"]
     cont = 0
     print("---DATA")
     with open("db/PLATOS.csv", mode="r") as infile:
         reader = csv.reader(infile)
         category_idx = 0
         for i, row in enumerate(reader):
-            category_idx += 1
             print(row)
             for idx in range(3, 10):
                 if row[idx] != "":
@@ -45,6 +52,7 @@ def procedure():
                     )
                     if int(max_idx_category[categories[category_idx]]) < int(row[idx]):
                         max_idx_category[categories[category_idx]] = row[idx]
+                category_idx += 1
             category_idx = 0
     with open("db/BINGOS.csv", mode="r") as infile:
         reader = csv.reader(infile)
@@ -54,7 +62,7 @@ def procedure():
                     cont += 1
                     bingos.append(
                         {
-                            "ticketid": "B" + row[idx],
+                            "ticketid": row[idx],
                             "name": row[0] if row[0] != "" else "N/A",
                             "level": row[1].upper(),
                             "grade": row[2].upper(),
@@ -70,6 +78,6 @@ def procedure():
                     if int(max_idx_category["B"]) < int(row[idx]):
                         max_idx_category["B"] = row[idx]
     with open("db/data.json", "w", encoding="utf-8") as f:
-        json.dump(plates+bingos, f, ensure_ascii=False, indent=4)
+        json.dump(plates + bingos, f, ensure_ascii=False, indent=4)
     with open("db/serial.json", "w", encoding="utf-8") as f:
         json.dump(max_idx_category, f, ensure_ascii=False, indent=4)

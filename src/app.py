@@ -1,17 +1,27 @@
 from flask import Flask, jsonify, make_response, request
-
-# import uuid
+import logging
+import os
+import sys
 from flask_session import Session
 from routes.Login import Login
 from routes.Ticket import Ticket
 
 app = Flask(__name__)
 
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
 app.secret_key = "secretkey"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SECURE"] = True
-app.config["PATH_FILE"] = "C:\Users\patrickfuentes\Documents\python-pymongo-restapi-crud\src\file"
+app.config[
+    "PATH_FILE"
+] = os.path.join(PROJECT_ROOT, "src", "file")
+handler = logging.FileHandler(
+    os.path.join(PROJECT_ROOT, "src", "file", "app.log")
+)  # errors logged to this file
+handler.setLevel(logging.ERROR)  # only log errors and above
+app.logger.addHandler(handler)  # attach the handler to the app's logger
 Session(app)
 
 app.register_blueprint(Login)

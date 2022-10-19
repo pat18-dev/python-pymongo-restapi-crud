@@ -1,13 +1,14 @@
 import functools
 import sys
 import traceback
-from flask import(
+from flask import (
     current_app,
     session,
     url_for,
     redirect,
     request,
 )
+
 
 def exception_handler(error_response):
     def factory_exception(func):

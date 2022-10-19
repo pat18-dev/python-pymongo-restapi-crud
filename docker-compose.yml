@@ -5,6 +5,7 @@ services:
     build: .
     volumes:
       - .:/code
+      - ./file:/file
     ports:
       - "3000:3000"
   database:

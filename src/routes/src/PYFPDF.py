@@ -4,14 +4,12 @@ from pathlib import Path
 
 from fpdf import FPDF
 
-from app.config import Config
-
 
 class PYFPDF(FPDF):
     def __init__(self):
         FPDF.__init__(self, "P", "cm", "A4")
 
-        self.lcTitulo = "FORMATO DE RESULTADOS"
+        self.lcTitulo = "FORMATO"
 
         self.ln_h = 0.4
         self.row_square = None
@@ -51,25 +49,25 @@ class PYFPDF(FPDF):
         if titulo is not None and len(titulo) > 0 and titulo.strip() != "":
             self.lcTitulo = titulo
 
-    def header(self):
-        loFirma = Config.PATH_PDF_SRC + "/logo.jpg"
-        if Path(loFirma).is_file():
-            self.image(loFirma, 1, 1, 3, 1.8)
+    # def header(self):
+    #     # loFirma = Config.PATH_PDF_SRC + "/logo.jpg"
+    #     # if Path(loFirma).is_file():
+    #     #     self.image(loFirma, 1, 1, 3, 1.8)
 
-        self.ln(0.3)
-        self.set_font("Arial", "B", 17)
-        self.cell(0, 0, self.lcTitulo, 0, 0, "C")
-        self.ln(1)
+    #     self.ln(0.3)
+    #     self.set_font("Arial", "B", 17)
+    #     self.cell(0, 0, self.lcTitulo, 0, 0, "C")
+    #     self.ln(1)
 
-    # Page footer
-    def footer(self):
-        self.set_y(-0.6)
-        self.set_font("Arial", "", 6)
-        self.cell(0, 0.2, "Teléfono: 054-276764", 0, 2, "L")
-        self.cell(0, 0.2, "Dirección: Calle León Velarde 406 Yanalnuara", 0, 2, "L")
-        self.set_y(-0.6)
-        self.cell(0, 0.2, "www.aliviari.pe", 0, 2, "R")
-        self.cell(0, 0.2, "Pagina " + str(self.page_no()) + "/{nb}", 0, 2, "R")
+    # # Page footer
+    # def footer(self):
+    #     self.set_y(-0.6)
+    #     self.set_font("Arial", "", 6)
+    #     self.cell(0, 0.2, "Teléfono: 054-276764", 0, 2, "L")
+    #     self.cell(0, 0.2, "Dirección: Calle León Velarde 406 Yanalnuara", 0, 2, "L")
+    #     self.set_y(-0.6)
+    #     self.cell(0, 0.2, "www.aliviari.pe", 0, 2, "R")
+    #     self.cell(0, 0.2, "Pagina " + str(self.page_no()) + "/{nb}", 0, 2, "R")
 
     def vertical_align(self, txt, nc, nb):
         txt = str(txt)

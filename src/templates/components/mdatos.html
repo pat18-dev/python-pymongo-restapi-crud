@@ -4,6 +4,6 @@
    <td>{{item["ticketid"]}}</td>
    <td>{{item["category"]}}</td>
    <td>{{item["name"]}}</td>
-   <td><button onclick="view_ticket('{{item["ticketid"]}}', 'N')" class="btn btn-success" type="button">Editar</button></td>
+   <td><button onclick="view_ticket('{{ item['ticketid'] }}', 'N')" class="btn btn-success" type="button">Editar</button></td>
 </tr>
 {% endfor %}

@@ -7,15 +7,16 @@ from flask import (
     redirect,
     url_for,
     session,
-    current_app
+    current_app,
 )
 
 from decorators import login_required
 from models import Ticket as TicketModel
-from mongodb import connect
-from routes.src.PaymentPDF import PaymentPDF
 
-UserRepository = connect("user")
+
+# from routes.src.PaymentPDF import PaymentPDF
+# from mongodb import connect
+# UserRepository = connect("ticket")
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 
 
@@ -30,15 +31,15 @@ def get_data() -> list:
 @Ticket.route("/<idx>")
 @login_required
 def tickets(idx):
-    print("---SESSION", file=stderr)
-    print(session, file=stderr)
+    print("---DATA", file=stderr)
     ladatos = list()
     data = get_data()
     if data:
-        if id is None:
+        if idx is None:
             ladatos = [row for row in data if row["state"] == "P"]
         else:
             ladatos = [row for row in data if row["ticketid"] == idx]
+    print(ladatos, file=stderr)
     if session.get("payment") is not None:
         for item in session["payment"]:
             ladatos[item["idx"]]["flag"] = 1
@@ -112,7 +113,7 @@ def make_pay():
         with open("src/db/serial.json", mode="r") as json_file:
             serial = json.load(json_file)
         nserial = serial["F"] + 1
-        loPdf = PaymentPDF(nserial, current_app.config["PATH_FILE"])
+        loPdf = PaymentPDF(current_app.config["PATH_FILE"], nserial)
         lst_ind = [item["idx"] for item in session["payment"]]
         with open("src/db/data.json", mode="r") as json_file:
             data = json.load(json_file)
