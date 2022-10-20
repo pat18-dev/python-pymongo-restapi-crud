@@ -10,7 +10,7 @@ from flask import (
 
 from routes.utils.decorators import login_required
 
-# from ..models.Ticket import Ticket as TicketModel
+from models.Ticket import Ticket as TicketModel
 from models.Ticket import CATEGORIES, LEVELS, GRADES
 
 from routes.utils.PaymentPDF import PaymentPDF
@@ -19,7 +19,7 @@ from routes.utils.PaymentPDF import PaymentPDF
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 
 
-def get_data() -> list:
+def get_data(path: str) -> list:
     data = list()
     with open("src/db/data.json", mode="r") as json_file:
         data = json.load(json_file)
@@ -110,7 +110,7 @@ def drop_from_car(sidx):
 
 
 @Ticket.route("/pay", methods=["GET"])
-def pay():
+def pays():
     ladatos = session["payment"] if session.get("payment") is not None else []
     return render_template(
         "payment.html",
@@ -121,8 +121,62 @@ def pay():
     )
 
 
-@Ticket.route("/pay", methods=["POST"])
-def make_pay():
+@Ticket.route("/drop_ticket", methods=["GET"])
+def drop_ticket():
+    idx = request.args.get("drop_idx")
+    with open("src/db/data.json", mode="r") as json_file:
+        data = json.load(json_file)
+    if data:
+        data[idx]["state"] = "X"
+        with open("db/data.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(TICKET)"}
+
+
+@Ticket.route("/drop_payment", methods=["POST"])
+def drop_payment():
+    tmp = request.get_json()
+    paymentid = tmp["paymentid"]
+    with open("src/db/payment.json", mode="r") as json_file:
+        data = json.load(json_file)
+    if data:
+        idx = None
+        for i, item in enumerate(data):
+            if paymentid == item["paymentid"]:
+                idx= i
+        if idx is not None:
+            del data[idx]
+            with open("db/data.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+    return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(COMPROBANTE)"}
+
+
+@Ticket.route("/save_ticket", methods=["POST"])
+def save_ticket():
+    tmp = request.get_json()
+    isnew = tmp["isnew"]
+    tmp.pop("isnew")
+    ticket = TicketModel(tmp)
+    if str(isnew).upper() == "TRUE":
+        with open("src/db/serial.json", mode="r") as json_file:
+            data = json.load(json_file)
+        if data:
+            ticketid = str(int(data[ticket.category]) + 1).zfill(4)
+            data[ticket.category] = ticketid
+            with open("db/data.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+    else:
+        with open("src/db/serial.json", mode="r") as json_file:
+            data = json.load(json_file)
+        if data:
+            data[ticket.idx] = ticket.to_json()
+            with open("db/data.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+    return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}
+
+
+@Ticket.route("/payment", methods=["POST"])
+def payment():
     name = request.args.get("name")
     if session.get("payment") is not None:
         with open("src/db/serial.json", mode="r") as json_file:

@@ -9,5 +9,6 @@
    {% endfor %}
    <td>{{ item["name"] }}</td>
    <td><button onclick="view_ticket('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Editar</button></td>
+   <td><button onclick="drop_ticket('{{ item['idx'] }}', false)" class="btn btn-danger" type="button">Eliminar</button></td>
 </tr>
 {% endfor %}

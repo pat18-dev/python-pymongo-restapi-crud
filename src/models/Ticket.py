@@ -10,14 +10,7 @@ STATE = {
     "X": "ANULADO",
 }
 
-PRICES = {
-    "O": 20.0, 
-    "P": 20.0, 
-    "R": 15.0, 
-    "L": 25.0, 
-    "A": 15.0, 
-    "B": 5.0
-}
+PRICES = {"O": 20.0, "P": 20.0, "R": 15.0, "L": 25.0, "A": 15.0, "B": 5.0}
 
 CATEGORIES = {
     "O": "POLLADA",
@@ -38,16 +31,17 @@ LEVELS = {
     "7": "4TO",
     "8": "5TO",
     "9": "6TO",
-    "10": "N/A"
+    "10": "N/A",
 }
 GRADES = {
     "1": "INICIAL",
     "2": "PRIMARIA",
     "3": "SECUNDARIA",
     "4": "DEUDORES",
-    "5": "N/A"
+    "5": "N/A",
 }
 DATE_FORMAT = "%d/%m/%Y, %H:%M:%S"
+
 
 @dataclass_json
 @dataclass(kw_only=True)

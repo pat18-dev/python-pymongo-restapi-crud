@@ -29,11 +29,11 @@ def procedure():
                     cat = categories[category_idx]
                     key_level = "10"
                     for k, v in LEVELS.items():
-                        if v == row[1].strip(' '):
+                        if v == row[1].strip(" "):
                             key_level = k
                     key_grade = "5"
                     for k, v in GRADES.items():
-                        if v == row[2].strip(' '):
+                        if v == row[2].strip(" "):
                             key_grade = k
                     plates.append(
                         {
@@ -62,11 +62,11 @@ def procedure():
                     cont += 1
                     key_level = "10"
                     for k, v in LEVELS.items():
-                        if v == row[1].strip(' '):
+                        if v == row[1].strip(" "):
                             key_level = k
                     key_grade = "5"
                     for k, v in GRADES.items():
-                        if v == row[2].strip(' '):
+                        if v == row[2].strip(" "):
                             key_grade = k
                     bingos.append(
                         {

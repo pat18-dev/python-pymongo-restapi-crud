@@ -15,9 +15,7 @@ app.secret_key = "secretkey"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SECURE"] = True
-app.config[
-    "PATH_FILE"
-] = os.path.join(PROJECT_ROOT, "src", "file")
+app.config["PATH_FILE"] = os.path.join(PROJECT_ROOT, "src", "file")
 handler = logging.FileHandler(
     os.path.join(PROJECT_ROOT, "src", "file", "app.log")
 )  # errors logged to this file
