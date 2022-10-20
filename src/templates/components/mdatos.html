@@ -8,7 +8,8 @@
       {% endif %}
    {% endfor %}
    <td>{{ item["name"] }}</td>
-   <td><button onclick="view_ticket('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Editar</button></td>
-   <td><button onclick="drop_ticket('{{ item['idx'] }}', false)" class="btn btn-danger" type="button">Eliminar</button></td>
+   <td><button onclick="view_ticket({{ item['idx'] }}, false)" class="btn btn-success" type="button">Editar</button></td>
+   <td><button onclick="add_ticket_to_car('{{ item['idx'] }}')" class="btn btn-info" type="button">Agregar</button></td>
+   <td><button onclick="drop_ticket({{ item['idx'] }})" class="btn btn-danger" type="button">Eliminar</button></td>
 </tr>
 {% endfor %}

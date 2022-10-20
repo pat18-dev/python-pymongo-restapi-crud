@@ -1,7 +1,7 @@
 {% extends "components/base.html" %} {% block content %}
 <div>{% include "/components/navbar.html" %}</div>
 
-<form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/ticket/filter">
+<form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/drop_from_car">
 	<input
 		class="form-control me-2"
 		type="input"
@@ -32,10 +32,16 @@
                {% endif %}
             {% endfor %}
             <td>{{item["name"]}}</td>
-            <td><button onclick="view_ticket('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Editar</button></td>
+            <td><button onclick="drop_from_car('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Eliminar</button></td>
          </tr>
          {% endfor %}
       </tbody>
    </table>
 </div>
+<script>
+   function drop_from_car(idx){
+		document.getElementById("drop_idx").value = idx;
+		document.getElementById("form_drop_ticket").submit();
+	}
+</script>
 {% endblock %}

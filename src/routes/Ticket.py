@@ -17,11 +17,12 @@ from routes.utils.PaymentPDF import PaymentPDF
 # from mongodb import connect
 # TicketRepository = connect("ticket")
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
+PATH_DATA = "src/db/data.json"
 
 
 def get_data(path: str) -> list:
     data = list()
-    with open("src/db/data.json", mode="r") as json_file:
+    with open(path, mode="r") as json_file:
         data = json.load(json_file)
     return data
 
@@ -30,15 +31,14 @@ def get_data(path: str) -> list:
 @Ticket.route("/<idx>")
 @login_required
 def tickets(idx):
-    print("---DATA", file=stderr)
     ladatos = list()
-    data = get_data()
+    data = get_data(PATH_DATA)
     if data:
         if idx is None:
             ladatos = [row for row in data if row["state"] == "P"]
         else:
+            idx = int(idx)
             ladatos = [row for row in data if row["ticketid"] == idx]
-    print(ladatos, file=stderr)
     if session.get("payment") is not None:
         for item in session["payment"]:
             ladatos[item["idx"]]["flag"] = 1
@@ -56,7 +56,7 @@ def tickets(idx):
 @Ticket.route("/view_ticket/<int:idx>", methods=["GET"])
 def view_ticket(idx):
     data = dict()
-    datos = get_data()
+    datos = get_data(PATH_DATA)
     if datos:
         data = datos[int(idx)]
     return data
@@ -64,11 +64,9 @@ def view_ticket(idx):
 
 @Ticket.route("/filter", methods=["GET"])
 def filter_ticket():
-    print("---SESSION", file=stderr)
-    print(session, file=stderr)
     param = request.args.get("param").upper()
     ladatos = list()
-    data = get_data()
+    data = get_data(PATH_DATA)
     if data:
         for row in data:
             if param in row["ticketid"] or param in row["name"]:
@@ -90,20 +88,20 @@ def filter_ticket():
 
 @Ticket.route("/add_to_car/<idx>", methods=["GET"])
 def add_to_car(idx):
-    data = get_data()
+    data = get_data(PATH_DATA)
     if session.get("payment") is None:
         session["payment"] = list()
     if data:
-        tmp = data[idx]
-        session["payment"].append(tmp)
+        session["payment"].append(data[int(idx)])
 
 
-@Ticket.route("/drop_from_car/<idx>", methods=["GET"])
-def drop_from_car(sidx):
+@Ticket.route("/drop_from_car", methods=["GET"])
+def drop_from_car():
+    id = int(request.args.get("drop_idx"))
     if session.get("payment") is not None:
         idx = None
         for i, item in enumerate(session["payment"]):
-            if item["idx"] == idx:
+            if item["idx"] == id:
                 idx = i
         if idx is not None:
             del session["payment"][idx]
@@ -111,7 +109,9 @@ def drop_from_car(sidx):
 
 @Ticket.route("/pay", methods=["GET"])
 def pays():
+    print("---SESSION", file=stderr)
     ladatos = session["payment"] if session.get("payment") is not None else []
+    print(ladatos, file=stderr)
     return render_template(
         "payment.html",
         title="payment",
@@ -123,7 +123,7 @@ def pays():
 
 @Ticket.route("/drop_ticket", methods=["GET"])
 def drop_ticket():
-    idx = request.args.get("drop_idx")
+    idx = int(request.args.get("drop_idx"))
     with open("src/db/data.json", mode="r") as json_file:
         data = json.load(json_file)
     if data:
@@ -143,7 +143,7 @@ def drop_payment():
         idx = None
         for i, item in enumerate(data):
             if paymentid == item["paymentid"]:
-                idx= i
+                idx = i
         if idx is not None:
             del data[idx]
             with open("db/data.json", "w", encoding="utf-8") as f:
@@ -169,7 +169,7 @@ def save_ticket():
         with open("src/db/serial.json", mode="r") as json_file:
             data = json.load(json_file)
         if data:
-            data[ticket.idx] = ticket.to_json()
+            data[ticket.idx] = tmp
             with open("db/data.json", "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=4)
     return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}

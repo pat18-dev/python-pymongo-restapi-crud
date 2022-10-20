@@ -28,19 +28,21 @@
 <div class="row mb-3">
 	<button
 		type="button"
-		class="btn btn-outline-success col-4"
+		class="btn btn-outline-success col-6"
 		onclick="view_ticket('N/A', true);"
 	>
 		Agregar
 	</button>
 	<button 
-		class="btn btn-outline-warning col-4" 
+		class="btn btn-outline-warning col-6" 
 		onclick="drop_payment();"
 		type="button">
 		Eliminar Comprobante
 	</button>
-	<button class="btn btn-outline-info col-4" type="button">Ir Carrito</button>
 </div>
+<form class="d-flex mb-3" method="GET" action="/ticket/pay">
+	<button class="btn btn-outline-info col-12" type="submit">Ir Carrito</button>
+</form>
 
 {% if search %}
 <div class="alert alert-warning text-center mb-3" role="alert">
@@ -58,6 +60,7 @@
 				<th scope="col">Tipo</th>
 				<th scope="col">Nombre</th>
 				<th scope="col">Editar</th>
+				<th scope="col">Agregar</th>
 				<th scope="col">Eliminar</th>
 			</tr>
 		</thead>
@@ -113,7 +116,7 @@
 			document.getElementById("exampleModal"),
 			{}
 		);
-		const url = "view_ticket/" + idx;
+		const url = "/view_ticket/" + idx;
 		if (isnew == true) {
 			fetch(url, {
 				method: "GET", // or 'PUT'
@@ -151,6 +154,20 @@
 		fetch(url, {
 			method: "POST", // or 'PUT'
 			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => console.log("Success:", response));
+	}
+
+	function add_ticket_to_car(idx) {
+		var url = "/ticket/add_to_car/" + idx;
+
+		fetch(url, {
+			method: "GET", // or 'PUT'
 			headers: {
 				"Content-Type": "application/json",
 			},
