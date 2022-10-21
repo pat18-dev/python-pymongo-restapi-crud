@@ -30,8 +30,10 @@ def procedure():
                     cont += 1
                     cat = categories[category_idx]
                     key_level = "10"
-                    if names.get(row[0]) is not None:
-                        names.update({personid: idx_names +1})
+                    if names.get(row[0]) is None:
+                        idx_names += 1
+                        names.update({row[0]: idx_names})
+                        personid = idx_names
                     else:
                         personid = names[row[0]]
                     for k, v in LEVELS.items():
@@ -68,8 +70,10 @@ def procedure():
                 if row[idx] != "":
                     cont += 1
                     key_level = "10"
-                    if names.get(row[0]) is not None:
-                        personid = idx_names +1
+                    if names.get(row[0]) is None:
+                        idx_names += 1
+                        names.update({row[0]: idx_names})
+                        personid = idx_names
                     else:
                         personid = names[row[0]]
                     for k, v in LEVELS.items():

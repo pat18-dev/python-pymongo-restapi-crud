@@ -1,15 +1,49 @@
 {% for item in datos %}
 <tr>
-   <th scope="row">{{ loop.index }}</th>
-   <td>{{ item["ticketid"] }}</td>
-   {% for k, v in categories.items() %}
-      {% if k == item["category"] %}
-         <td>{{ v }}</td>
-      {% endif %}
-   {% endfor %}
-   <td>{{ item["name"] }}</td>
-   <td><button onclick="view_ticket({{ item['idx'] }}, false)" class="btn btn-success" type="button">Editar</button></td>
-   <td><button onclick="add_ticket_to_car('{{ item['idx'] }}')" class="btn btn-info" type="button">Agregar</button></td>
-   <td><button onclick="drop_ticket({{ item['idx'] }})" class="btn btn-danger" type="button">Eliminar</button></td>
+	<th scope="row">{{ loop.index }}</th>
+	<td>{{ item["ticketid"] }}</td>
+	{% for k, v in categories.items() %} {% if k == item["category"] %}
+	<td>{{ v }}</td>
+	{% endif %} {% endfor %}
+	<td>{{ item["name"] }}</td>
+	<td>
+		<button
+			onclick="view_ticket({{ item['idx'] }}, false)"
+			class="btn btn-warning"
+			type="button"
+		>
+			Editar
+		</button>
+	</td>
+	{% if item["flag"] == 0 %}
+	<td>
+		<button
+			onclick="add_ticket_to_car('{{ item['idx'] }}')"
+			class="btn btn-info"
+			type="button"
+		>
+			Agregar a carrito
+		</button>
+	</td>
+	{% else %}
+	<td>
+		<button
+			onclick="drop_from_car('{{ item['idx'] }}', false)"
+			class="btn btn-dark"
+			type="button"
+		>
+			Quitar de carrito
+		</button>
+	</td>
+	{% endif %}
+	<td>
+		<button
+			onclick="drop_ticket({{ item['idx'] }})"
+			class="btn btn-danger"
+			type="button"
+		>
+			Eliminar
+		</button>
+	</td>
 </tr>
 {% endfor %}

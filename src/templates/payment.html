@@ -1,7 +1,7 @@
 {% extends "components/base.html" %} {% block content %}
 <div>{% include "/components/navbar.html" %}</div>
 
-<form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/drop_from_car">
+<form class="d-flex visually-hidden" id="form_drop_from_car" method="GET" action="/drop_from_car">
 	<input
 		class="form-control me-2"
 		type="input"
@@ -41,7 +41,7 @@
 <script>
    function drop_from_car(idx){
 		document.getElementById("drop_idx").value = idx;
-		document.getElementById("form_drop_ticket").submit();
+		document.getElementById("form_drop_from_car").submit();
 	}
 </script>
 {% endblock %}

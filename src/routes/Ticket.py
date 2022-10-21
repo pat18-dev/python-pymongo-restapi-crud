@@ -6,6 +6,8 @@ from flask import (
     render_template,
     session,
     current_app,
+    redirect,
+    url_for
 )
 
 from routes.utils.decorators import login_required
@@ -93,6 +95,7 @@ def add_to_car(idx):
         session["payment"] = list()
     if data:
         session["payment"].append(data[int(idx)])
+    return redirect(url_for('tickets'))
 
 
 @Ticket.route("/drop_from_car", methods=["GET"])
@@ -105,6 +108,7 @@ def drop_from_car():
                 idx = i
         if idx is not None:
             del session["payment"][idx]
+    return redirect(url_for('tickets'))
 
 
 @Ticket.route("/pay", methods=["GET"])
@@ -123,7 +127,7 @@ def pays():
 
 @Ticket.route("/drop_ticket", methods=["GET"])
 def drop_ticket():
-    idx = int(request.args.get("drop_idx"))
+    idx = int(request.args.get("idx"))
     with open("src/db/data.json", mode="r") as json_file:
         data = json.load(json_file)
     if data:

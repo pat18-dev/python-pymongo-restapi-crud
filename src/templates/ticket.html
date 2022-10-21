@@ -14,7 +14,18 @@
 	</form>
 </div>
 
-<form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/ticket/filter">
+<form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/ticket/drop_ticket">
+	<input
+		class="form-control me-2"
+		type="input"
+		id="drop_idx"
+		name="idx"
+		placeholder="Eliminar"
+		aria-label="Eliminar"
+	/>
+</form>
+
+<form class="d-flex visually-hidden" id="form_drop_from_car" method="GET" action="/drop_from_car">
 	<input
 		class="form-control me-2"
 		type="input"
@@ -60,7 +71,7 @@
 				<th scope="col">Tipo</th>
 				<th scope="col">Nombre</th>
 				<th scope="col">Editar</th>
-				<th scope="col">Agregar</th>
+				<th scope="col">Agregar/Quitar de carrito</th>
 				<th scope="col">Eliminar</th>
 			</tr>
 		</thead>
@@ -108,6 +119,13 @@
 	}
 
 	function onclose(){
+		document.getElementById("isnew").value          = "";
+		document.getElementById("modal_idx").value      = 0;
+		document.getElementById("modal_id").value       = 0;
+		document.getElementById("modal_name").value     = "";
+		document.getElementById('modal_level').value    = 10;
+		document.getElementById('modal_grade').value    = 5;
+		document.getElementById('modal_category').selectedIndex = 0;
 		document.getElementById("exampleModal").classList.remove('my-modal-wrapper');
 	}
 
@@ -116,8 +134,8 @@
 			document.getElementById("exampleModal"),
 			{}
 		);
-		const url = "/view_ticket/" + idx;
-		if (isnew == true) {
+		const url = "/ticket/view_ticket/" + idx;
+		if (isnew == false) {
 			fetch(url, {
 				method: "GET", // or 'PUT'
 				headers: {
@@ -144,6 +162,11 @@
 	function drop_ticket(idx){
 		document.getElementById("drop_idx").value = idx;
 		document.getElementById("form_drop_ticket").submit();
+	}
+
+	function drop_from_car(idx){
+		document.getElementById("drop_idx").value = idx;
+		document.getElementById("form_drop_from_car").submit();
 	}
 
 	function drop_payment() {

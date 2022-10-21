@@ -48,11 +48,14 @@ DATE_FORMAT = "%d/%m/%Y, %H:%M:%S"
 class Ticket:
     ticketid = None
     name: str
-    level: str
-    grade: str
-    state: str
+    personid: int = 0
+    level: str = "10"
+    grade: str = "5"
+    state: str = "P"
     write_udi: str
-    price: float
+    price: float = 0.0
+    flag: int = 0
+    idx: int = 0
     write_at: field(default_factory=datetime.now().strftime(DATE_FORMAT))
     category: List[str] = field(
         default_factory=lambda: [k for k, _ in CATEGORIES.items()]
