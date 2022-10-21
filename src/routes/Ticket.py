@@ -7,7 +7,7 @@ from flask import (
     session,
     current_app,
     redirect,
-    url_for
+    url_for,
 )
 
 from routes.utils.decorators import login_required
@@ -16,6 +16,7 @@ from models.Ticket import Ticket as TicketModel
 from models.Ticket import CATEGORIES, LEVELS, GRADES
 
 from routes.utils.PaymentPDF import PaymentPDF
+
 # from mongodb import connect
 # TicketRepository = connect("ticket")
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
@@ -53,8 +54,8 @@ def tickets(idx):
         grades=GRADES,
         categories=CATEGORIES,
     )
-    
-    
+
+
 @Ticket.route("/view_ticket/<int:idx>", methods=["GET"])
 def view_ticket(idx):
     data = dict()
@@ -94,13 +95,18 @@ def add_to_car(idx):
     if session.get("payment") is None:
         session["payment"] = list()
     if data:
-        session["payment"].append(data[int(idx)])
-    return redirect(url_for('tickets'))
+        flag = False
+        for item in session["payment"]:
+            if item["idx"] == int(idx):
+                flag = True
+        if flag:
+            session["payment"].append(data[int(idx)])
+    return redirect(url_for("tickets"))
 
 
 @Ticket.route("/drop_from_car", methods=["GET"])
 def drop_from_car():
-    id = int(request.args.get("drop_idx"))
+    id = int(request.args.get("idx"))
     if session.get("payment") is not None:
         idx = None
         for i, item in enumerate(session["payment"]):
@@ -108,7 +114,7 @@ def drop_from_car():
                 idx = i
         if idx is not None:
             del session["payment"][idx]
-    return redirect(url_for('tickets'))
+    return redirect(url_for("Ticket.pays"))
 
 
 @Ticket.route("/pay", methods=["GET"])
@@ -207,4 +213,4 @@ def payment():
         loPdf.setDatos(session["payment"])
         session["payment"] = list()
         return {"ok": 1, "message": nserial}
-    return {"ok": 0, "message": "ERROR NO HAY DATOS SELECCIONADOS}"}
+    return redirect(url_for("tickets"))
