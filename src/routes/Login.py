@@ -17,8 +17,9 @@ Login = Blueprint("Login", __name__)
 @Login.route("/login", methods=["GET", "POST"])
 def login():
     users = {"caja1": "parrillada", "caja2": "pollada"}
+    ids = {"caja1": 0, "caja2": 1}
     error = None
-    user = {"id": "00000000", "name": "INVITADO", "is_authenticated": False}
+    user = {"id": 0, "name": "INVITADO", "is_authenticated": False}
     if request.method == "POST":
         print("---DATA", file=stderr)
         data = request.form.to_dict()
@@ -28,7 +29,7 @@ def login():
         if users[data["document"]] != data["password"]:
             flash("Error password")
         user = {
-            "id": data["document"],
+            "id": ids["document"],
             "name": users[data["document"]],
             "is_authenticated": True,
         }

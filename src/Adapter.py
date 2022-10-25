@@ -19,12 +19,10 @@ def procedure():
     categories = ["O", "P", "R", "L", "A", "O", "P"]
     cont = 0
     idx_names = 0
-    print("---DATA")
     with open("db/PLATOS.csv", mode="r") as infile:
         reader = csv.reader(infile)
         category_idx = 0
         for i, row in enumerate(reader):
-            print(row)
             for idx in range(3, 10):
                 if row[idx] != "":
                     cont += 1
@@ -48,11 +46,11 @@ def procedure():
                             "ticketid": row[idx],
                             "name": row[0] if row[0] != "" else "N/A",
                             "personid": personid,
-                            "level": key_level,
-                            "grade": key_grade,
-                            "category": cat,
-                            "state": "P",
-                            "write_udi": "N/A",
+                            "levelid": key_level,
+                            "gradeid": key_grade,
+                            "categoryid": cat,
+                            "stateid": "P",
+                            "write_uid": "0",
                             "write_at": "17/10/2022, 00:00:00",
                             "flag": 0,
                             "idx": cont,
@@ -88,11 +86,11 @@ def procedure():
                             "ticketid": row[idx],
                             "name": row[0] if row[0] != "" else "N/A",
                             "personid": personid,
-                            "level": key_level,
-                            "grade": key_grade,
-                            "category": cat,
-                            "state": "P",
-                            "write_udi": "N/A",
+                            "levelid": key_level,
+                            "gradeid": key_grade,
+                            "categoryid": cat,
+                            "stateid": "P",
+                            "write_uid": "0",
                             "write_at": "17/10/2022, 00:00:00",
                             "flag": 0,
                             "price": 5.0,
@@ -107,3 +105,24 @@ def procedure():
         json.dump(max_idx_category, f, ensure_ascii=False, indent=4)
     with open("db/name.json", "w", encoding="utf-8") as f:
         json.dump(names, f, ensure_ascii=False, indent=4)
+    with open("db/insert.json", "w", encoding="utf-8") as f:
+        data = plates + bingos
+        pvt = ""
+        f.write("INSERT INTO ticket(ticketid,personid,levelid,gradeid,categoryid,stateid,write_uid,write_at) VALUES\n")
+        print("INSERT")
+        for item in data:
+            pvt = ",".join([
+                    str(item["ticketid"]),
+                    str(item["personid"]),
+                    str(item["levelid"]),
+                    str(item["gradeid"]),
+                    str(item["categoryid"]),
+                    str(item["stateid"]),
+                    str(item["write_uid"]),
+                    str(item["write_at"]),
+                ])
+            f.write("("+ pvt +"),\n")
+            pvt = ""
+
+if __name__ == '__main__':
+    procedure()

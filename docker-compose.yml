@@ -8,10 +8,16 @@ services:
       - ./file:/file
     ports:
       - "3000:3000"
-  database:
-    image: mongo
-    restart: always
+  db:
+    image: postgres:10-alpine
+    # restart: always
     volumes:
-      - ./mongo:/data/db:rw
+      - ./postgres_data_prod:/var/lib/postgresql/data/
+      # copy the sql script to create tables
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+      # copy the sql script to fill tables
+      - ./sql/fill.sql:/docker-entrypoint-initdb.d/fill_tables.sql
+    env_file:
+      - ./.env.db
     ports:
-      - 27017:27017
+      - "5434:5434"
