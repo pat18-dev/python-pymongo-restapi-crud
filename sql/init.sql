@@ -1,31 +1,37 @@
-CREATE TABLE ticket(
-   id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS ticket(
+    id SERIAL PRIMARY KEY,
 	ticketid CHARACTER(4),
-	personid INTEGER,
+	name VARCHAR(300),
 	levelid INTEGER,
 	gradeid INTEGER,
 	categoryid CHARACTER(1),
 	stateid CHARACTER(1) DEFAULT 'P',
 	write_uid INTEGER,
+	personid INTEGER DEFAULT 9999,
+	paymentid INTEGER,
 	write_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE person(
+CREATE TABLE IF NOT EXISTS person(
 	personid INTEGER  PRIMARY KEY,
 	name VARCHAR(200)
 );
-CREATE TABLE level(
+CREATE TABLE IF NOT EXISTS level(
 	levelid INTEGER  PRIMARY KEY,
 	description VARCHAR(200)
 );
-CREATE TABLE grade(
+CREATE TABLE IF NOT EXISTS grade(
 	gradeid INTEGER  PRIMARY KEY,
 	description VARCHAR(200)
 );
-CREATE TABLE category(
+CREATE TABLE IF NOT EXISTS category(
 	categoryid CHARACTER(1)  PRIMARY KEY,
 	description VARCHAR(200)
 );
-CREATE TABLE state(
+CREATE TABLE IF NOT EXISTS state(
 	stateid CHARACTER(1)  PRIMARY KEY,
 	description VARCHAR(200)
+);
+CREATE TABLE IF NOT EXISTS payment(
+	id SERIAL PRIMARY KEY,
+	stateid CHARACTER(1) DEFAULT 'P'
 );

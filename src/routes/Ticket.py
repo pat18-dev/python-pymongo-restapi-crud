@@ -16,17 +16,40 @@ from models.Ticket import Ticket as TicketModel
 from models.Ticket import CATEGORIES, LEVELS, GRADES
 
 from routes.utils.PaymentPDF import PaymentPDF
+from routes.utils.PlSql import PlSql
 
 # from mongodb import connect
 # TicketRepository = connect("ticket")
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 PATH_DATA = "src/db/data.json"
+_ReferencePlSql = PlSql("host=172.27.0.2 dbname=my_db user=postgres password=postgres port=5432")
 
 
-def get_data(path: str) -> list:
+def get_data(where = None) -> list:
+    # data = list()
+    # with open(path, mode="r") as json_file:
+    #     data = json.load(json_file)
+    # return data
     data = list()
-    with open(path, mode="r") as json_file:
-        data = json.load(json_file)
+    slots = [
+        'id',
+        'ticketid',
+        'personid',
+        'levelid',
+        'gradeid',
+        'categoryid',
+        'stateid',
+        'write_uid',
+        'write_at',
+        'name',
+        'flag'
+    ]
+    # query = f"SELECT {slots} FROM ticket;"
+    query = "SELECT A.id,A.ticketid,A.personid,A.levelid,A.gradeid,A.categoryid,A.stateid,A.write_uid,A.write_at,B.name,0 FROM ticket A INNER JOIN person B ON B.personid = A.personid"
+    if where is not None:
+        query += where
+    _ReferencePlSql.exec(query)
+    data = [dict(zip(slots, row)) for row in _ReferencePlSql.data]
     return data
 
 
@@ -35,13 +58,10 @@ def get_data(path: str) -> list:
 @login_required
 def tickets(idx):
     ladatos = list()
-    data = get_data(PATH_DATA)
-    if data:
-        if idx is None:
-            ladatos = [row for row in data if row["state"] == "P"]
-        else:
-            idx = int(idx)
-            ladatos = [row for row in data if row["ticketid"] == idx]
+    if idx is None:
+        ladatos = get_data(" WHERE stateid = 'P'")
+    else:
+        ladatos = get_data(f" WHERE id = {int(idx)}")
     if session.get("payment") is not None:
         for item in session["payment"]:
             ladatos[item["idx"]]["flag"] = 1
@@ -58,22 +78,13 @@ def tickets(idx):
 
 @Ticket.route("/view_ticket/<int:idx>", methods=["GET"])
 def view_ticket(idx):
-    data = dict()
-    datos = get_data(PATH_DATA)
-    if datos:
-        data = datos[int(idx)]
-    return data
+    return get_data(f" WHERE id = {int(idx)}")
 
 
 @Ticket.route("/filter", methods=["GET"])
 def filter_ticket():
     param = request.args.get("param").upper()
-    ladatos = list()
-    data = get_data(PATH_DATA)
-    if data:
-        for row in data:
-            if param in row["ticketid"] or param in row["name"]:
-                ladatos.append(row)
+    ladatos = get_data(f" WHERE ticketid LIKE '%{param}%' OR name LIKE '%{param}%'")
     if session.get("payment") is not None:
         for item in session["payment"]:
             ladatos[item["idx"]]["flag"] = 1
@@ -91,16 +102,16 @@ def filter_ticket():
 
 @Ticket.route("/add_to_car/<idx>", methods=["GET"])
 def add_to_car(idx):
-    data = get_data(PATH_DATA)
+    ladatos = get_data(" WHERE stateid = 'P'")
     if session.get("payment") is None:
         session["payment"] = list()
-    if data:
+    if ladatos:
         flag = False
         for item in session["payment"]:
-            if item["idx"] == int(idx):
+            if item["id"] == int(idx):
                 flag = True
         if flag:
-            session["payment"].append(data[int(idx)])
+            session["payment"].append(ladatos[int(idx)])
     return redirect(url_for("tickets"))
 
 
@@ -110,7 +121,7 @@ def drop_from_car():
     if session.get("payment") is not None:
         idx = None
         for i, item in enumerate(session["payment"]):
-            if item["idx"] == id:
+            if item["id"] == id:
                 idx = i
         if idx is not None:
             del session["payment"][idx]
@@ -134,12 +145,10 @@ def pays():
 @Ticket.route("/drop_ticket", methods=["GET"])
 def drop_ticket():
     idx = int(request.args.get("idx"))
-    with open("src/db/data.json", mode="r") as json_file:
-        data = json.load(json_file)
-    if data:
-        data[idx]["state"] = "X"
-        with open("db/data.json", "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+    ladata = get_data(f" WHERE id = {int(idx)}")
+    if ladata:
+        query = f"UPDATE ticket SET stateid = 'X' WHERE id = {idx}"
+        _ReferencePlSql.exec(query)
     return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(TICKET)"}
 
 
@@ -147,17 +156,8 @@ def drop_ticket():
 def drop_payment():
     tmp = request.get_json()
     paymentid = tmp["paymentid"]
-    with open("src/db/payment.json", mode="r") as json_file:
-        data = json.load(json_file)
-    if data:
-        idx = None
-        for i, item in enumerate(data):
-            if paymentid == item["paymentid"]:
-                idx = i
-        if idx is not None:
-            del data[idx]
-            with open("db/data.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+    query = f"UPDATE payment SET stateid = 'X' WHERE id = {paymentid}"
+    _ReferencePlSql.exec(query)
     return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(COMPROBANTE)"}
 
 
@@ -165,23 +165,19 @@ def drop_payment():
 def save_ticket():
     tmp = request.get_json()
     isnew = tmp["isnew"]
-    tmp.pop("isnew")
     ticket = TicketModel(tmp)
     if str(isnew).upper() == "TRUE":
-        with open("src/db/serial.json", mode="r") as json_file:
-            data = json.load(json_file)
-        if data:
-            ticketid = str(int(data[ticket.category]) + 1).zfill(4)
-            data[ticket.category] = ticketid
-            with open("db/data.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+        query = f"""
+        INSERT INTO ticket
+        (ticketid,name,levelid,gradeid,categoryid,stateid,write_uid,write_at) VALUES
+        SELECT LPAD(((MAX(ticketid)::INT)+1), 4, '0'), {tmp["name"]},{tmp["levelid"]},{tmp["gradeid"]},{tmp["categoryid"]},'P',{session["current_user"]["id"]},NOW() WHERE categoryid = {tmp["categoryid"]} LIMIT 1"""
+        _ReferencePlSql.exec(query)
     else:
-        with open("src/db/serial.json", mode="r") as json_file:
-            data = json.load(json_file)
-        if data:
-            data[ticket.idx] = tmp
-            with open("db/data.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+        query = f"""
+        UPDATE ticket SET
+        person={tmp["name"]},levelid={tmp["levelid"]},gradeid={tmp["gradeid"]},categoryid={tmp["categoryid"]},write_uid={session["current_user"]["id"]},write_at=NOW()
+        WHERE id = {tmp["id"]}"""
+        _ReferencePlSql.exec(query)
     return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}
 
 
@@ -189,27 +185,12 @@ def save_ticket():
 def payment():
     name = request.args.get("name")
     if session.get("payment") is not None:
-        with open("src/db/serial.json", mode="r") as json_file:
-            serial = json.load(json_file)
-        nserial = serial["F"] + 1
+        query = f"INSERT INTO payment(stateid) VALUES('P') RETURNING id"
+        _ReferencePlSql.exec(query)
+        serial = _ReferencePlSql.data[0]
+        nserial = str(serial).zfill(8)
         loPdf = PaymentPDF(current_app.config["PATH_FILE"], nserial)
-        lst_ind = [item["idx"] for item in session["payment"]]
-        with open("src/db/data.json", mode="r") as json_file:
-            data = json.load(json_file)
-        if data:
-            for idx in lst_ind:
-                if data[idx]["state"] != "P":
-                    return {
-                        "ok": 0,
-                        "message": f"ERROR PAGO: {data[idx]['ticketid']}",
-                    }
-        for idx in lst_ind:
-            data[idx]["state"] = "E"
-        with open("db/data.json", "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        with open("db/bill.json", "a", encoding="utf-8") as f:
-            json.dump(session["payment"], f, ensure_ascii=False, indent=4)
-        loPdf.setData({"name": name, "id": str(nserial).zfill(8)})
+        loPdf.setData({"name": name, "id": nserial})
         loPdf.setDatos(session["payment"])
         session["payment"] = list()
         return {"ok": 1, "message": nserial}

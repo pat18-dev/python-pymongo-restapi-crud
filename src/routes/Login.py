@@ -29,7 +29,7 @@ def login():
         if users[data["document"]] != data["password"]:
             flash("Error password")
         user = {
-            "id": ids["document"],
+            "id": ids[data["document"]],
             "name": users[data["document"]],
             "is_authenticated": True,
         }
