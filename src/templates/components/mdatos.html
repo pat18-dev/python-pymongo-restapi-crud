@@ -2,13 +2,13 @@
 <tr>
 	<th scope="row">{{ loop.index }}</th>
 	<td>{{ item["ticketid"] }}</td>
-	{% for k, v in categories.items() %} {% if k == item["category"] %}
-	<td>{{ v }}</td>
+	{% for k, v in categories.items() %} {% if k == item["categoryid"] %}
+		<td>{{ v }}</td>
 	{% endif %} {% endfor %}
 	<td>{{ item["name"] }}</td>
 	<td>
 		<button
-			onclick="view_ticket({{ item['idx'] }}, false)"
+			onclick="view_ticket({{ item['id'] }}, false)"
 			class="btn btn-warning"
 			type="button"
 		>
@@ -18,7 +18,7 @@
 	{% if item["flag"] == 0 %}
 	<td>
 		<button
-			onclick="add_ticket_to_car('{{ item['idx'] }}')"
+			onclick="add_ticket_to_car('{{ item['id'] }}')"
 			class="btn btn-info"
 			type="button"
 		>
@@ -28,7 +28,7 @@
 	{% else %}
 	<td>
 		<button
-			onclick="drop_from_car('{{ item['idx'] }}', false)"
+			onclick="drop_from_car('{{ item['id'] }}')"
 			class="btn btn-dark"
 			type="button"
 		>
@@ -38,7 +38,7 @@
 	{% endif %}
 	<td>
 		<button
-			onclick="drop_ticket({{ item['idx'] }})"
+			onclick="drop_ticket({{ item['id'] }})"
 			class="btn btn-danger"
 			type="button"
 		>

@@ -9,6 +9,7 @@ from .PYFPDF import PYFPDF
 
 class PaymentPDF:
     def __init__(self, p_cPath, p_cCodigo):
+        self.codigo = p_cCodigo
         self.lcPath = p_cPath
         Path(p_cPath).mkdir(parents=True, exist_ok=True)
         self.paData = None
@@ -38,7 +39,8 @@ class PaymentPDF:
         loPdf.add_page()
         loPdf.setHeader("BOLETA")
         loPdf.set_margins(1, 1.6, 1)
-        self.setWidth(loPdf._width)
+        loPdf.set_font("Arial", "", 6)
+        self.setWidth(loPdf._width())
         w1 = self.l_w * 0.1
         w3 = self.l_w * 0.3
         w4 = self.l_w * 0.4
@@ -47,8 +49,14 @@ class PaymentPDF:
         loPdf.row(["COMPROBANTE:", self.paData["id"]], [w1, w4])
         loPdf.row(["FECHA:", datetime.now().strftime(DATE_FORMAT)], [w1, w4])
         loPdf.row(["NOMBRE", self.paData["name"]], [w1, w4])
+        total = 0
         if self.paDatos is not None:
-            cat = item["category"]
             for i, item in enumerate(self.paDatos):
+                cat = item["categoryid"]
+                total += PRICES[cat]
                 loPdf.row([i, CATEGORIES[cat], PRICES[cat]], [w1, w6, w3])
+            loPdf.row(["", "TOTAL", total], [w1, w6, w3])
             loPdf.set_border(0)
+        loPdf.output(self.lcPath + "/" + self.codigo + ".pdf", "F")
+        print("------------------PATH--------------")
+        print(self.lcPath + "/" + self.codigo + ".pdf")

@@ -1,7 +1,12 @@
 {% extends "components/base.html" %} {% block content %}
 <div>{% include "/components/navbar.html" %}</div>
 
-<form class="d-flex visually-hidden" id="form_drop_from_car" method="GET" action="/ticket/drop_from_car">
+<form
+	class="d-flex visually-hidden"
+	id="form_drop_from_car"
+	method="GET"
+	action="/ticket/drop_from_car"
+>
 	<input
 		class="form-control me-2"
 		type="input"
@@ -13,39 +18,100 @@
 </form>
 
 <form class="d-flex mb-3" method="POST" action="/ticket/payment">
-	<button class="btn btn-outline-info col-12" type="submit">Pagar</button>
+	<input
+		class="form-control me-2"
+		type="input"
+		name="name"
+		placeholder="Nombre de la persona que pagara"
+		aria-label="Pagar"
+	/>
+	<button
+		class="btn btn-outline-info col-3"
+		type="button"
+		onclick="pay_for_ticket();return false;"
+	>
+		Pagar
+	</button>
 </form>
 
 <div>
-   <table class="table">
-      <thead>
-         <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Eliminar</th>
-         </tr>
-      </thead>
-      <tbody>
-         {% for item in datos %}
-         <tr>
-            <th scope="row">{{ loop.index }}</th>
-            <td>{{ item["ticketid"] }}</td>
-            {% for k, v in categories.items() %}
-               {% if k == item["category"] %}
-                  <td>{{ v }}</td>
-               {% endif %}
-            {% endfor %}
-            <td>{{item["name"]}}</td>
-            <td><button onclick="drop_from_car('{{ item['idx'] }}', false)" class="btn btn-success" type="button">Eliminar</button></td>
-         </tr>
-         {% endfor %}
-      </tbody>
-   </table>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">ID</th>
+				<th scope="col">Tipo</th>
+				<th scope="col">Nombre</th>
+				<th scope="col">Eliminar</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in datos %}
+			<tr>
+				<th scope="row">{{ loop.index }}</th>
+				<td>{{ item["ticketid"] }}</td>
+				{% for k, v in categories.items() %} {% if k == item["categoryid"]
+				%}
+				<td>{{ v }}</td>
+				{% endif %} {% endfor %}
+				<td>{{item["name"]}}</td>
+				<td>
+					<button
+						onclick="drop_from_car('{{ item['id'] }}')"
+						class="btn btn-danger"
+						type="button"
+					>
+						Eliminar
+					</button>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </div>
 <script>
-   function drop_from_car(idx){
+	function drop_from_car(idx) {
 		document.getElementById("drop_idx").value = idx;
 		document.getElementById("form_drop_from_car").submit();
+	}
+
+	function pay_for_ticket() {
+		var url = "/ticket/payment";
+		var data = { name: document.getElementById("name").value };
+
+		fetch(url, {
+			method: "POST", // or 'PUT'
+			body: JSON.stringify(data), // data can be `string` or {object}!
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => {
+				console.log("Success:", response);
+				if ((response.ok = 1)) {
+					get_file(response.message);
+				}
+			});
+	}
+
+	function get_file(filename) {
+		fetch("/ticket/report/pdf/filename", {
+			method: "GET",
+		})
+			.then((response) => response.blob())
+			.then((blob) => {
+				var url = window.URL.createObjectURL(blob);
+				var a = document.createElement("a");
+				a.href = url;
+            tmp_filename = new Date().toLocaleString()
+				a.download = tmp_filename+".pdf";
+				document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+				a.click();
+				a.remove(); //afterwards we remove the element again
+      });
+      window.location.href = "/ticket/";
 	}
 </script>
 {% endblock %}

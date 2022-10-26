@@ -14,6 +14,17 @@
 	</form>
 </div>
 
+<form class="d-flex visually-hidden" id="form_add_to_car" method="GET" action="/ticket/add_to_car">
+	<input
+		class="form-control me-2"
+		type="input"
+		id="add_idx"
+		name="idx"
+		placeholder="Agregar"
+		aria-label="Agregar"
+	/>
+</form>
+
 <form class="d-flex visually-hidden" id="form_drop_ticket" method="GET" action="/ticket/drop_ticket">
 	<input
 		class="form-control me-2"
@@ -130,6 +141,7 @@
 	}
 
 	function view_ticket(idx, isnew) {
+		onclose();
 		const myModal = new bootstrap.Modal(
 			document.getElementById("exampleModal"),
 			{}
@@ -147,12 +159,12 @@
 				.then((response) => {
 					console.log("Success:", response);
 					document.getElementById("isnew").value          = String(isnew);
-					document.getElementById("modal_idx").value      = response.idx;
+					document.getElementById("modal_idx").value      = response.id;
 					document.getElementById("modal_id").value       = response.ticketid;
 					document.getElementById("modal_name").value     = response.name;
-					document.getElementById('modal_level').value    = response.level;
-					document.getElementById('modal_grade').value    = response.grade;
-					document.getElementById('modal_category').value = response.category;
+					document.getElementById('modal_level').value    = response.levelid;
+					document.getElementById('modal_grade').value    = response.gradeid;
+					document.getElementById('modal_category').value = response.categoryid;
 			});
 		}
 		document.getElementById("exampleModal").classList.add("my-modal-wrapper");
@@ -171,7 +183,7 @@
 
 	function drop_payment() {
 		const id = prompt("Numero de comprobante");
-		var url = "/drop_payment";
+		var url = "/ticket/drop_payment";
 		var data = { paymentid: id };
 
 		fetch(url, {
@@ -187,31 +199,23 @@
 	}
 
 	function add_ticket_to_car(idx) {
-		var url = "/ticket/add_to_car/" + idx;
-
-		fetch(url, {
-			method: "GET", // or 'PUT'
-			headers: {
-				"Content-Type": "application/json",
-			},
-		})
-			.then((res) => res.json())
-			.catch((error) => console.error("Error:", error))
-			.then((response) => console.log("Success:", response));
+		document.getElementById("add_idx").value = idx;
+		document.getElementById("form_add_to_car").submit();
 	}
 
-	function save() {
-		const url = "/save_ticket";
+	function save_ticket() {
+		const url = "/ticket/save_ticket";
 		let data = {
 			isnew:    document.getElementById("isnew").value,
-			idx:      document.getElementById("modal_idx").value || "N/A",
+			id:      document.getElementById("modal_idx").value || "N/A",
 			ticketid: document.getElementById("modal_id").value || "N/A",
 			name:     document.getElementById("modal_name").value || "N/A",
-			level:    document.getElementById("modal_level").value,
-			grade:    document.getElementById("modal_grade").value,
-			category: document.getElementById("modal_category").value,
+			levelid:    document.getElementById("modal_level").value,
+			gradeid:    document.getElementById("modal_grade").value,
+			categoryid: document.getElementById("modal_category").value,
 		};
-
+		console.log("---DATA TO SEND")
+		console.log(data)
 		fetch(url, {
 			method: "POST", // or 'PUT'
 			body: JSON.stringify(data), // data can be `string` or {object}!
