@@ -24,8 +24,11 @@ from routes.utils.PlSql import PlSql
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 PATH_DATA = "src/db/data.json"
 _ReferencePlSql = PlSql(
-    "host=172.27.0.3 dbname=my_db user=postgres password=postgres port=5432"
+    "host=172.27.0.2 dbname=my_db user=postgres password=postgres port=5432"
 )
+
+# print("---SESSION", file=stderr)
+# print(session["payment"], file=stderr)
 
 
 def get_data(where=None) -> list:
@@ -46,6 +49,7 @@ def get_data(where=None) -> list:
     query = "SELECT id,ticketid,personid,levelid,gradeid,categoryid,stateid,write_uid,write_at,name,0 FROM ticket"
     if where is not None:
         query += where
+    query += " ORDER BY id"
     _ReferencePlSql.exec(query)
     data = [dict(zip(slots, row)) for row in _ReferencePlSql.data]
     return data
@@ -55,15 +59,18 @@ def get_data(where=None) -> list:
 @Ticket.route("/<idx>")
 @login_required
 def tickets(idx):
+    ladatos = list()
     if idx is None:
-        ladatos = get_data(" WHERE stateid = 'P'")
+        data = get_data(" WHERE stateid = 'P'")
     else:
-        ladatos = get_data(f" WHERE id = {int(idx)}")
-    print("---SESSION", file=stderr)
-    print(session["payment"], file=stderr)
-    if session.get("payment") is not None:
-        for item in session["payment"]:
-            ladatos[item["id"]]["flag"] = 1
+        data = get_data(f" WHERE id = {idx}")
+    if session.get("payment"):
+        print("---SESSION", file=stderr)
+        print(session["payment"], file=stderr)
+        for indice in range(len(data)):
+            if data[indice]["id"] in session["payment"]:
+                data[indice]["flag"] = 1    
+        ladatos = data
     return render_template(
         "ticket.html",
         title="ticket",
@@ -78,7 +85,7 @@ def tickets(idx):
 @Ticket.route("/reset_pay")
 @login_required
 def reset_payment():
-    session["payment"] = list()
+    session["payment"] = set()
     return {"ok": 1, "message": "SESSION LIMPIA"}
 
 
@@ -89,11 +96,13 @@ def view_ticket(idx):
 
 @Ticket.route("/filter", methods=["GET"])
 def filter_ticket():
+    ladatos = list()
     param = request.args.get("param").upper()
-    ladatos = get_data(f" WHERE ticketid LIKE '%{param}%' OR name LIKE '%{param}%'")
-    if session.get("payment") is not None:
-        for item in session["payment"]:
-            ladatos[item["id"]]["flag"] = 1
+    data = get_data(f" WHERE ticketid LIKE '%{param}%' OR name LIKE '%{param}%'")
+    for indice in range(len(data)):
+        if data[indice]["id"] in session["payment"]:
+            data[indice]["flag"] = 1    
+    ladatos = data
     return render_template(
         "ticket.html",
         title="ticket",
@@ -109,17 +118,11 @@ def filter_ticket():
 @Ticket.route("/add_to_car", methods=["GET"])
 def add_to_car():
     try:
-        id = int(request.args.get("idx")) - 1
-        ladatos = get_data(f" WHERE id = {id}")[0]
+        id = int(request.args.get("idx"))
         if session.get("payment") is None:
-            session["payment"] = list()
-        if ladatos:
-            flag = False
-            for item in session["payment"]:
-                if item["id"] == id:
-                    flag = True
-            if not flag:
-                session["payment"].append(ladatos)
+            session["payment"] = set()
+        if id not in session["payment"]:
+            session["payment"].append(id)
     except Exception as err:
         print("---ERROR", file=stderr)
         print(err, file=stderr)
@@ -128,22 +131,20 @@ def add_to_car():
 
 @Ticket.route("/drop_from_car", methods=["GET"])
 def drop_from_car():
-    id = int(request.args.get("idx")) - 1
-    if session.get("payment") is not None:
-        idx = None
-        for i, item in enumerate(session["payment"]):
-            if item["id"] == id:
-                idx = i
-        if idx is not None:
-            del session["payment"][idx]
+    id = int(request.args.get("idx"))
+    if session.get("payment"):
+        if id in session["payment"]:
+            del session["payment"][id]
     return redirect(url_for("Ticket.pays"))
 
 
 @Ticket.route("/pay", methods=["GET"])
 def pays():
-    print("---SESSION", file=stderr)
-    ladatos = session["payment"] if session.get("payment") is not None else []
-    print(ladatos, file=stderr)
+    ladatos = list()
+    if session.get("payment"):
+        filter = ",".join([str(item) for item in session["payment"]])
+        ladatos = get_data(f" WHERE id in ({filter})")
+        print(ladatos, file=stderr)
     return render_template(
         "payment.html",
         title="payment",
@@ -155,7 +156,7 @@ def pays():
 
 @Ticket.route("/drop_ticket", methods=["GET"])
 def drop_ticket():
-    idx = int(request.args.get("idx")) - 1
+    idx = int(request.args.get("idx"))
     ladata = get_data(f" WHERE id = {int(idx)}")
     if ladata:
         query = f"UPDATE ticket SET stateid = 'X' WHERE id = {idx}"
@@ -176,8 +177,6 @@ def drop_payment():
 @Ticket.route("/save_ticket", methods=["POST"])
 def save_ticket():
     tmp = request.get_json()
-    print("---JSON", file=stderr)
-    print(tmp, file=stderr)
     isnew = tmp["isnew"]
     if str(isnew).upper() == "TRUE":
         query = f"""
@@ -191,7 +190,6 @@ def save_ticket():
         name='{tmp["name"]}',levelid={tmp["levelid"]},gradeid={tmp["gradeid"]},categoryid='{tmp["categoryid"]}',write_uid={session["current_user"]["id"]},write_at=NOW()
         WHERE id = {tmp["id"]}"""
         # _ReferencePlSql.exec(query)
-    print(query, file=stderr)
     return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}
 
 
@@ -209,10 +207,10 @@ def payment():
         _ReferencePlSql.exec(query1)
         loPdf = PaymentPDF(current_app.config["PATH_FILE"], nserial)
         loPdf.setData({"name": name, "id": nserial})
-        filter = ",".join(session["payment"])
+        filter = filter = ",".join([str(item) for item in session["payment"]])
         loPdf.setDatos(get_data(f" WHERE id IN ({filter})"))
         loPdf.mxprint(CATEGORIES, PRICES, DATE_FORMAT)
-        session["payment"] = list()
+        session["payment"] = set()
         response = {"ok": 1, "message": nserial}
     return response
 
@@ -225,6 +223,16 @@ def send_pdf(filename):
 @Ticket.route("/report/xls")
 def send_xls():
     ladatos = get_data(f" WHERE stateid = 'E' AND paymentid IS NOT NULL")
+    data = list()
+    tmp = dict()
+    for indice in range(len(ladatos)):
+        tmp = ladatos[indice]
+        cat = tmp["categoryid"]
+        tmp["category"] = CATEGORIES[cat]
+        tmp["price"] = PRICES[cat]
+        tmp["level"] = LEVELS[tmp["level"]]
+        tmp["grade"] = GRADES[tmp["grade"]]
+        data.append(tmp)
     data = [v for row in ladatos for _, v in row.items()]
     with open("example.csv", "w") as file:
         writer = csv.writer(file)

@@ -1,6 +1,6 @@
 {% for item in datos %}
 <tr>
-	<th scope="row">{{ loop.index }}</th>
+	<th scope="row">{{ item['id'] }}</th>
 	<td>{{ item["ticketid"] }}</td>
 	{% for k, v in categories.items() %} {% if k == item["categoryid"] %}
 		<td>{{ v }}</td>
