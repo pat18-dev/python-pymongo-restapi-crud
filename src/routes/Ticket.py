@@ -70,7 +70,7 @@ def tickets(idx):
         for indice in range(len(data)):
             if data[indice]["id"] in session["payment"]:
                 data[indice]["flag"] = 1    
-        ladatos = data
+    ladatos = data
     return render_template(
         "ticket.html",
         title="ticket",
@@ -99,9 +99,10 @@ def filter_ticket():
     ladatos = list()
     param = request.args.get("param").upper()
     data = get_data(f" WHERE ticketid LIKE '%{param}%' OR name LIKE '%{param}%'")
-    for indice in range(len(data)):
-        if data[indice]["id"] in session["payment"]:
-            data[indice]["flag"] = 1    
+    if session.get("payment"):
+        for indice in range(len(data)):
+            if data[indice]["id"] in session["payment"]:
+                data[indice]["flag"] = 1    
     ladatos = data
     return render_template(
         "ticket.html",
