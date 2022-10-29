@@ -29,7 +29,7 @@
 	<input
 		class="form-control me-2"
 		type="input"
-		id="drop_idx"
+		id="drop_ticket_idx"
 		name="idx"
 		placeholder="Eliminar"
 		aria-label="Eliminar"
@@ -40,7 +40,7 @@
 	<input
 		class="form-control me-2"
 		type="input"
-		id="drop_idx"
+		id="drop_car_idx"
 		name="idx"
 		placeholder="Eliminar"
 		aria-label="Eliminar"
@@ -51,7 +51,7 @@
 	<button
 		type="button"
 		class="btn btn-outline-success col-6"
-		onclick="view_ticket('N/A', true);"
+		onclick="view_ticket('N/A', 1);"
 	>
 		Agregar
 	</button>
@@ -130,7 +130,6 @@
 	}
 
 	function onclose(){
-		document.getElementById("isnew").value          = "";
 		document.getElementById("modal_idx").value      = 0;
 		document.getElementById("modal_id").value       = 0;
 		document.getElementById("modal_name").value     = "";
@@ -146,8 +145,8 @@
 			document.getElementById("exampleModal"),
 			{}
 		);
-		const url = "/ticket/view_ticket/" + idx;
-		if (isnew == false) {
+		if (isnew == 0) {
+			const url = "/ticket/view_ticket/" + idx;
 			fetch(url, {
 				method: "GET", // or 'PUT'
 				headers: {
@@ -158,7 +157,7 @@
 				.catch((error) => console.error("Error:", error))
 				.then((response) => {
 					console.log("Success:", response);
-					document.getElementById("isnew").value          = String(isnew);
+					document.getElementById("isnew").value          = isnew;
 					document.getElementById("modal_idx").value      = response.id;
 					document.getElementById("modal_id").value       = response.ticketid;
 					document.getElementById("modal_name").value     = response.name;
@@ -167,17 +166,18 @@
 					document.getElementById('modal_category').value = response.categoryid;
 			});
 		}
+		document.getElementById("isnew").value = isnew;
 		document.getElementById("exampleModal").classList.add("my-modal-wrapper");
 		myModal.show();
 	}
 
 	function drop_ticket(idx){
-		document.getElementById("drop_idx").value = idx;
+		document.getElementById("drop_ticket_idx").value = idx;
 		document.getElementById("form_drop_ticket").submit();
 	}
 
 	function drop_from_car(idx){
-		document.getElementById("drop_idx").value = idx;
+		document.getElementById("drop_car_idx").value = idx;
 		document.getElementById("form_drop_from_car").submit();
 	}
 
@@ -206,10 +206,10 @@
 	function save_ticket() {
 		const url = "/ticket/save_ticket";
 		let data = {
-			isnew:    document.getElementById("isnew").value,
-			id:      document.getElementById("modal_idx").value || "N/A",
-			ticketid: document.getElementById("modal_id").value || "N/A",
-			name:     document.getElementById("modal_name").value || "N/A",
+			isnew:      document.getElementById("isnew").value,
+			id:         document.getElementById("modal_idx").value || "N/A",
+			ticketid:   document.getElementById("modal_id").value || "N/A",
+			name:       document.getElementById("modal_name").value || "N/A",
 			levelid:    document.getElementById("modal_level").value,
 			gradeid:    document.getElementById("modal_grade").value,
 			categoryid: document.getElementById("modal_category").value,
@@ -228,7 +228,8 @@
 			.then((response) => {
 				console.log("Success:", response);
 				alert("Creado exitosamente codigo "+ response.ticketid)
-			});
+		});
+		window.location.href = "/ticket/";
 	}
 </script>
 {% endblock %}

@@ -24,7 +24,7 @@ from routes.utils.PlSql import PlSql
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 PATH_DATA = "src/db/data.json"
 _ReferencePlSql = PlSql(
-    "host=172.27.0.2 dbname=my_db user=postgres password=postgres port=5432"
+    "host=172.27.0.3 dbname=my_db user=postgres password=postgres port=5432"
 )
 
 # print("---SESSION", file=stderr)
@@ -135,7 +135,7 @@ def drop_from_car():
     id = int(request.args.get("idx"))
     if session.get("payment"):
         if id in session["payment"]:
-            del session["payment"][id]
+            session["payment"].remove(id)
     return redirect(url_for("Ticket.pays"))
 
 
@@ -165,6 +165,52 @@ def drop_ticket():
     return redirect(url_for("Ticket.tickets"))
 
 
+@Ticket.route("/save_ticket", methods=["POST"])
+def save_ticket():
+    tmp = request.get_json()
+    isnew = tmp["isnew"]
+    if isnew == '1':
+        query0 = f"""SELECT LPAD(((MAX(ticketid)::INTEGER)+1)::TEXT,4,'0') AS serial FROM ticket WHERE categoryid = '{tmp["categoryid"]}' LIMIT 1"""
+        _ReferencePlSql.exec(query0)
+        nserial = [row for row in _ReferencePlSql.data][0][0]
+        query = f"""
+        INSERT INTO ticket
+        (ticketid,name,levelid,gradeid,categoryid,stateid,write_uid,write_at) VALUES
+        ('{nserial}', UPPER('{tmp["name"]}'),{tmp["levelid"]},{tmp["gradeid"]},'{tmp["categoryid"]}','P',{session["current_user"]["id"]},NOW())"""
+    else:
+        query = f"""
+        UPDATE ticket SET
+        name=UPPER('{tmp["name"]}'),levelid={tmp["levelid"]},gradeid={tmp["gradeid"]},categoryid='{tmp["categoryid"]}',write_uid={session["current_user"]["id"]},write_at=NOW()
+        WHERE id = {tmp["id"]}"""
+    _ReferencePlSql.exec(query)
+    print(query, file=stderr)
+    return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}
+
+
+@Ticket.route("/payment", methods=["POST"])
+def payment():
+    name = request.args.get("name")  if request.args.get("name") else "GRACIAS POR SU PARTICIPACION"
+    response = {"ok": 0, "message": "ERROR AL GENERAR PAGART"}
+    if session.get("payment"):
+        print("---PAGAR", file=stderr)
+        filter = ",".join([str(item) for item in session["payment"]])
+        query = f"INSERT INTO payment(stateid) VALUES('A') RETURNING id"
+        _ReferencePlSql.exec(query)
+        serial = _ReferencePlSql.data[0][0]
+        print(serial, file=stderr)
+        nserial = str(serial).zfill(8)
+        query1 = f"UPDATE ticket SET stateid = 'E', paymentid = {nserial} WHERE id IN ({filter})"
+        print(query1, file=stderr)
+        _ReferencePlSql.exec(query1)
+        loPdf = PaymentPDF(current_app.config["PATH_FILE"], nserial)
+        loPdf.setData({"name": name.upper(), "id": nserial})
+        loPdf.setDatos(get_data(f" WHERE id IN ({filter})"))
+        loPdf.mxprint(CATEGORIES, PRICES, DATE_FORMAT)
+        session["payment"] = set()
+        response = {"ok": 1, "message": nserial}
+    return response
+
+
 @Ticket.route("/drop_payment", methods=["POST"])
 def drop_payment():
     paymentid = int(request.args.get("id"))
@@ -175,50 +221,9 @@ def drop_payment():
     return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(COMPROBANTE)"}
 
 
-@Ticket.route("/save_ticket", methods=["POST"])
-def save_ticket():
-    tmp = request.get_json()
-    isnew = tmp["isnew"]
-    if str(isnew).upper() == "TRUE":
-        query = f"""
-        INSERT INTO ticket
-        (ticketid,name,levelid,gradeid,categoryid,stateid,write_uid,write_at) VALUES
-        SELECT LPAD(((MAX(ticketid)::INT)+1), 4, '0'), {tmp["name"]},{tmp["levelid"]},{tmp["gradeid"]},{tmp["categoryid"]},'P',{session["current_user"]["id"]},NOW() WHERE categoryid = {tmp["categoryid"]} LIMIT 1"""
-        # _ReferencePlSql.exec(query)
-    else:
-        query = f"""
-        UPDATE ticket SET
-        name='{tmp["name"]}',levelid={tmp["levelid"]},gradeid={tmp["gradeid"]},categoryid='{tmp["categoryid"]}',write_uid={session["current_user"]["id"]},write_at=NOW()
-        WHERE id = {tmp["id"]}"""
-        # _ReferencePlSql.exec(query)
-    return {"ok": 1, "message": "CREADO EXITOSAMENTE(TICKET)"}
-
-
-@Ticket.route("/payment", methods=["POST"])
-def payment():
-    name = request.args.get("name")
-    response = {"ok": 0, "message": "ERROR AL GENERAR PAGART"}
-    if session.get("payment"):
-        ids = ",".join([item for item in session["payment"]])
-        query = f"INSERT INTO payment(stateid) VALUES('A') RETURNING id"
-        _ReferencePlSql.exec(query)
-        serial = _ReferencePlSql.data[0]
-        nserial = str(serial).zfill(8)
-        query1 = f"UPDATE ticket SET stateid = 'E', paymentid = {nserial} WHERE id IN ({ids})"
-        _ReferencePlSql.exec(query1)
-        loPdf = PaymentPDF(current_app.config["PATH_FILE"], nserial)
-        loPdf.setData({"name": name, "id": nserial})
-        filter = filter = ",".join([str(item) for item in session["payment"]])
-        loPdf.setDatos(get_data(f" WHERE id IN ({filter})"))
-        loPdf.mxprint(CATEGORIES, PRICES, DATE_FORMAT)
-        session["payment"] = set()
-        response = {"ok": 1, "message": nserial}
-    return response
-
-
 @Ticket.route("/report/pdf/name")
 def send_pdf(filename):
-    return send_from_directory(current_app.config["PATH_FILE"], filename + ".pdf")
+    return send_from_directory(current_app.config["PATH_FILE"], filename)
 
 
 @Ticket.route("/report/xls")

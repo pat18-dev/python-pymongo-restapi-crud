@@ -6,44 +6,50 @@
 		<td>{{ v }}</td>
 	{% endif %} {% endfor %}
 	<td>{{ item["name"] }}</td>
-	<td>
-		<button
-			onclick="view_ticket({{ item['id'] }}, false)"
-			class="btn btn-warning"
-			type="button"
-		>
-			Editar
-		</button>
-	</td>
-	{% if item["flag"] == 0 %}
-	<td>
-		<button
-			onclick="add_ticket_to_car('{{ item['id'] }}')"
-			class="btn btn-info"
-			type="button"
-		>
-			Agregar a carrito
-		</button>
-	</td>
+	{% if item["stateid"] == 'E' %}
+		<td class="table-danger" colspan="3">TERMINADO</td>
+	{% elif item["stateid"] == 'X' %}
+		<td class="table-secondary" colspan="3">ELIMINADO</td>
 	{% else %}
-	<td>
-		<button
-			onclick="drop_from_car('{{ item['id'] }}')"
-			class="btn btn-dark"
-			type="button"
-		>
-			Quitar de carrito
-		</button>
-	</td>
+		<td>
+			<button
+				onclick="view_ticket({{ item['id'] }}, 0)"
+				class="btn btn-warning"
+				type="button"
+			>
+				Editar
+			</button>
+		</td>
+		{% if item["flag"] == 0 %}
+		<td>
+			<button
+				onclick="add_ticket_to_car('{{ item['id'] }}')"
+				class="btn btn-info"
+				type="button"
+			>
+				Agregar a carrito
+			</button>
+		</td>
+		{% else %}
+		<td>
+			<button
+				onclick="drop_from_car('{{ item['id'] }}')"
+				class="btn btn-dark"
+				type="button"
+			>
+				Quitar de carrito
+			</button>
+		</td>
+		{% endif %}
+		<td>
+			<button
+				onclick="drop_ticket({{ item['id'] }})"
+				class="btn btn-danger"
+				type="button"
+			>
+				Eliminar
+			</button>
+		</td>
 	{% endif %}
-	<td>
-		<button
-			onclick="drop_ticket({{ item['id'] }})"
-			class="btn btn-danger"
-			type="button"
-		>
-			Eliminar
-		</button>
-	</td>
 </tr>
 {% endfor %}

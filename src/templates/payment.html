@@ -22,6 +22,7 @@
 		class="form-control me-2"
 		type="input"
 		name="name"
+		id="name"
 		placeholder="Nombre de la persona que pagara"
 		aria-label="Pagar"
 	/>
@@ -33,6 +34,16 @@
 		Pagar
 	</button>
 </form>
+
+<div class="d-flex mb-3">
+	<button
+		class="btn btn-outline-secondary col-12"
+		type="button"
+		onclick="report_xls();return false;"
+	>
+		Descargar Reporte
+	</button>
+</div>
 
 <div>
 	<table class="table">
@@ -91,9 +102,26 @@
 			.then((response) => {
 				console.log("Success:", response);
 				if ((response.ok = 1)) {
-					get_file(response.message);
+					get_file(response.message + ".pdf");
 				}
 			});
+	}
+
+	function report_xls(){
+		var url = "/ticket/report/xls";
+
+		fetch(url, {
+			method: "GET", // or 'PUT'
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => res.json())
+			.catch((error) => console.error("Error:", error))
+			.then((response) => {
+				console.log("Success:", response);
+			});
+			get_file('report.xls');
 	}
 
 	function get_file(filename) {
@@ -110,8 +138,8 @@
 				document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
 				a.click();
 				a.remove(); //afterwards we remove the element again
-      });
-      window.location.href = "/ticket/";
+			});
+			window.location.href = "/ticket/";
 	}
 </script>
 {% endblock %}
