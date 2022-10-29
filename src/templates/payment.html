@@ -103,7 +103,7 @@
 				console.log("Success:", response);
 				if ((response.ok = 1)) {
 					console.log("Success:", response);
-					get_file("/ticket/report/pdf/"+ response.message + ".pdf");
+					get_file("/ticket/report/"+ response.message + ".pdf",".pdf");
 				}
 			});
 	}
@@ -122,10 +122,10 @@
 			.then((response) => {
 				console.log("Success:", response);
 			});
-			get_file("/ticket/report/xls/report.xls");
+			get_file("/ticket/report/report.csv",".csv");
 	}
 
-	function get_file(url) {
+	function get_file(url, extension_file) {
 		fetch(url, {
 			method: "GET",
 		})
@@ -135,7 +135,7 @@
 				var a = document.createElement("a");
 				a.href = url;
             tmp_filename = new Date().toLocaleString()
-				a.download = tmp_filename+".pdf";
+				a.download = tmp_filename+extension_file;
 				document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
 				a.click();
 				a.remove(); //afterwards we remove the element again

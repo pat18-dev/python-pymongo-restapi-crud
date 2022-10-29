@@ -24,15 +24,14 @@ from routes.utils.PlSql import PlSql
 
 Ticket = Blueprint("Ticket", __name__, url_prefix="/ticket")
 PATH_DATA = "src/db/data.json"
-_ReferencePlSql = PlSql(
-    "host=172.27.0.2 dbname=my_db user=postgres password=postgres port=5432"
-)
+
 
 # print("---SESSION", file=stderr)
 # print(session["payment"], file=stderr)
 
 
 def get_data(where=None) -> list:
+    _ReferencePlSql = PlSql(current_app.config["DSN_PSQL"])
     data = list()
     slots = [
         "id",
@@ -158,6 +157,7 @@ def pays():
 
 @Ticket.route("/drop_ticket", methods=["GET"])
 def drop_ticket():
+    _ReferencePlSql = PlSql(current_app.config["DSN_PSQL"])
     idx = int(request.args.get("idx"))
     ladata = get_data(f" WHERE id = {int(idx)}")
     if ladata:
@@ -168,6 +168,7 @@ def drop_ticket():
 
 @Ticket.route("/save_ticket", methods=["POST"])
 def save_ticket():
+    _ReferencePlSql = PlSql(current_app.config["DSN_PSQL"])
     tmp = request.get_json()
     isnew = tmp["isnew"]
     if isnew == '1':
@@ -190,6 +191,7 @@ def save_ticket():
 
 @Ticket.route("/payment", methods=["POST"])
 def payment():
+    _ReferencePlSql = PlSql(current_app.config["DSN_PSQL"])
     name = request.args.get("name")  if request.args.get("name") else "GRACIAS POR SU PARTICIPACION"
     response = {"ok": 0, "message": "ERROR AL GENERAR PAGART"}
     if session.get("payment"):
@@ -211,6 +213,7 @@ def payment():
 
 @Ticket.route("/drop_payment", methods=["POST"])
 def drop_payment():
+    _ReferencePlSql = PlSql(current_app.config["DSN_PSQL"])
     try:
         paymentid = int(request.args.get("id"))
     except Exception as e:
@@ -222,27 +225,49 @@ def drop_payment():
     return {"ok": 1, "message": "ELIMINADO CORRECTAMENTE(COMPROBANTE)"}
 
 
-@Ticket.route("/report/pdf/<filename>")
+@Ticket.route("/report/<filename>")
 def send_pdf(filename):
     return send_from_directory(current_app.config["PATH_FILE"], filename)
 
 
 @Ticket.route("/report/xls")
 def send_xls():
-    PATH_FILE = os.path.join(current_app.config["PATH_FILE"], "report.csv")
-    ladatos = get_data(f" WHERE stateid = 'E' AND paymentid IS NOT NULL")
-    data = list()
-    tmp = dict()
-    for indice in range(len(ladatos)):
-        tmp = ladatos[indice]
-        cat = tmp["categoryid"]
-        tmp["category"] = CATEGORIES[cat]
-        tmp["price"] = PRICES[cat]
-        tmp["level"] = LEVELS[tmp["level"]]
-        tmp["grade"] = GRADES[tmp["grade"]]
-        data.append(tmp)
-    data = [v for row in ladatos for _, v in row.items()]
-    with open(PATH_FILE, "w") as file:
-        writer = csv.writer(file)
-        writer.writerow(data)
-    return send_from_directory(current_app.config["PATH_FILE"], "report.csv")
+    try:
+        PATH_FILE = os.path.join(current_app.config["PATH_FILE"], "report.csv")
+        ladatos = get_data(f" WHERE stateid = 'E' AND paymentid IS NOT NULL")
+        data = list()
+        tmp = dict()
+        for indice in range(len(ladatos)):
+            tmp = ladatos[indice]
+            cat = tmp["categoryid"]
+            tmp["category"] = CATEGORIES[cat]
+            tmp["price"] = PRICES[cat]
+            tmp["level"] = LEVELS[str(ladatos[indice]["levelid"])]
+            tmp["grade"] = GRADES[str(ladatos[indice]["gradeid"])]
+            data.append(tmp)
+        slots = [
+            "id",
+            "ticketid",
+            "personid",
+            "levelid",
+            "gradeid",
+            "categoryid",
+            "stateid",
+            "write_uid",
+            "write_at",
+            "name",
+            'flag',
+            'price',
+            'category',
+            'grade',
+            'level'
+        ]
+        print("----DATA", file=stderr)
+        print(data, file=stderr)  
+        with open(PATH_FILE, "w") as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=slots)
+            writer.writeheader()
+            writer.writerows(data)
+        return {"ok": 1, "message": "GENERADO CORRECTAMENTE"}
+    except Exception as e:
+        return {"ok": 0, "message": "ALGO SALIO MAL"}
