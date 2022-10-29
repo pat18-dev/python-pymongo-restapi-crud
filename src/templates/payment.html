@@ -102,7 +102,8 @@
 			.then((response) => {
 				console.log("Success:", response);
 				if ((response.ok = 1)) {
-					get_file(response.message + ".pdf");
+					console.log("Success:", response);
+					get_file("/ticket/report/pdf/"+ response.message + ".pdf");
 				}
 			});
 	}
@@ -121,11 +122,11 @@
 			.then((response) => {
 				console.log("Success:", response);
 			});
-			get_file('report.xls');
+			get_file("/ticket/report/xls/report.xls");
 	}
 
-	function get_file(filename) {
-		fetch("/ticket/report/pdf/filename", {
+	function get_file(url) {
+		fetch(url, {
 			method: "GET",
 		})
 			.then((response) => response.blob())

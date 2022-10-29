@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from datetime import datetime
+import os
 from pathlib import Path
+from sys import stderr
 from .decorators import exception_handler
 
 from .PYFPDF import PYFPDF
@@ -17,6 +19,8 @@ class PaymentPDF:
         self.error = None
         self.l_w = 0
         self.l_h = 0.4
+        print(self.lcPath, file=stderr)
+        print(self.codigo, file=stderr)
 
     def setData(self, data):
         self.paData = data
@@ -46,17 +50,26 @@ class PaymentPDF:
         w4 = self.l_w * 0.4
         w6 = self.l_w * 0.6
         loPdf.set_border(1)
+        print("----DATA", file=stderr)
+        print(self.paData, file=stderr)
         loPdf.row(["COMPROBANTE:", self.paData["id"]], [w1, w4])
         loPdf.row(["FECHA:", datetime.now().strftime(DATE_FORMAT)], [w1, w4])
         loPdf.row(["NOMBRE", self.paData["name"]], [w1, w4])
         total = 0
+        print("---DATOS", file=stderr)
+        print(self.paDatos, file=stderr)
         if self.paDatos is not None:
             for i, item in enumerate(self.paDatos):
+                print(item, file=stderr)
                 cat = item["categoryid"]
                 total += PRICES[cat]
+                print(total, file=stderr)
+                print(CATEGORIES[cat], file=stderr)
+                print(PRICES[cat], file=stderr)
                 loPdf.row([i, CATEGORIES[cat], PRICES[cat]], [w1, w6, w3])
             loPdf.row(["", "TOTAL", total], [w1, w6, w3])
             loPdf.set_border(0)
-        loPdf.output(self.lcPath + "/" + self.codigo + ".pdf", "F")
+        total_path = os.path.join(self.lcPath, self.codigo+".pdf")
+        loPdf.output(total_path, "F")
         print("------------------PATH--------------")
-        print(self.lcPath + "/" + self.codigo + ".pdf")
+        print(total_path, file=stderr)
