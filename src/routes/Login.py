@@ -16,8 +16,8 @@ Login = Blueprint("Login", __name__)
 
 @Login.route("/login", methods=["GET", "POST"])
 def login():
-    users = {"caja1": "parrillada", "caja2": "pollada"}
-    ids = {"caja1": 0, "caja2": 1}
+    users = {"caja1": "parrillada", "caja2": "pollada", "user": "user"}
+    ids = {"caja1": 0, "caja2": 1, "user": 2}
     error = None
     user = {"id": 0, "name": "INVITADO", "is_authenticated": False}
     if request.method == "POST":
